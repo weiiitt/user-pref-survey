@@ -1,0 +1,30 @@
+
+.history-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.history-item {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.history-item-content {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 20px;
+}
+
+.history-item-map {
+    width: 80%;
+}
+
+.history-item-routes {
+    display: flex;
+    flex-direction: column;
+    width: 20%;
+    gap: 20px;
+}

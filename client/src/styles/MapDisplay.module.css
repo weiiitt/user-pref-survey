@@ -1,0 +1,50 @@
+.mapContainer {
+  height: 100%;
+  width: 100%;
+} 
+
+/* Base class for leaflet marker icons */
+img.leafletMarkerIcon { 
+  /* This class is added by L.Icon.Default when className is specified. 
+     We target the img tag directly. */
+}
+
+/* Style for the source marker icon (e.g., change to green) */
+img.sourceMarker {
+  filter: hue-rotate(10deg) saturate(2);
+}
+
+/* Style for the destination marker icon (e.g., change to red) */
+img.destinationMarker {
+  filter: hue-rotate(150deg) saturate(2); /* Adjust for desired red from blue */
+} 
+
+/* Styles for Route A with outline */
+.customPolylineRouteA_casing {
+  stroke: #0435D9; /* Outline color */
+  stroke-width: 10; /* Outline width (main line width + 2px) */
+  opacity: 0.9; /* Match original opacity */
+  transition: all 0.15s ease-in-out; 
+}
+
+.customPolylineRouteA_line {
+  stroke: #5076F3; /* Main line color */
+  stroke-width: 6; /* Main line width */
+  opacity: 0.9; /* Match original opacity */
+  transition: all 0.15s ease-in-out; 
+}
+
+/* Styles for Route B with outline */
+.customPolylineRouteB_casing {
+  stroke: #B6470C; /* Outline color */
+  stroke-width: 10; /* Original width 5 + 2 for casing */
+  opacity: 0.9; /* Leaflet default stroke opacity for polylines */
+  transition: all 0.15s ease-in-out; 
+}
+
+.customPolylineRouteB_line {
+  stroke: #F07939; /* Leaflet default polyline color */
+  stroke-width: 6; /* Original specified width */
+  opacity: 0.9; /* Leaflet default stroke opacity */
+  transition: all 0.15s ease-in-out; 
+} 
