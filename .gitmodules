@@ -1,3 +1,3 @@
 [submodule "server/server/services/APReL"]
 	path = server/server/services/APReL
-	url = https://github.com/yi-shiuan-tung/APReL/ 
+	url = git@github.com:yi-shiuan-tung/APReL.git 
