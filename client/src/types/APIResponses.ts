@@ -6,6 +6,8 @@ export interface RouteResponse {
       coordinates: [number, number][]; // Array of [lat, lng] pairs
       distance: number;               // Total distance in meters
       elevationGain: number;          // Total elevation gain in meters
+      positiveGrade: number;          // Positive grade (uphill grade changes)
+      negativeGrade: number;          // Negative grade (downhill grade changes)
       avgGrade: number;               // Average absolute grade of the route
       leftTurns: number;              // Number of left turns
       rightTurns: number;             // Number of right turns
@@ -28,6 +30,8 @@ export interface HistoryRouteDetail {
   coordinates: [number, number][];
   distance: number;
   elevationGain: number;
+  positiveGrade: number;
+  negativeGrade: number;
   avgGrade: number;
   leftTurns: number;
   rightTurns: number;

@@ -151,39 +151,25 @@ def generate_routes():
         for original_idx, route in valid_path_nodes:
             route_guid = str(uuid.uuid4()) # GUID for external reference
             coords = [[graph.nodes[node]['y'], graph.nodes[node]['x']] for node in route]
-            distance = sum(
-                min(edge_data.get('length', 0) for edge_data in graph.get_edge_data(u, v).values())
-                for u, v in zip(route[:-1], route[1:])
-            )
             
-            elevation_gain = 0
-            avg_abs_grade = 0
+            # Get the trajectory object and its features
+            trajectory = routes.slate.trajectories[original_idx]
+            features = trajectory.features
             
-            try:
-                # Calculate elevation changes (both up and down)
-                elevation_changes = [
-                    abs(graph.nodes[route[i+1]].get('elevation', 0) - graph.nodes[route[i]].get('elevation', 0))
-                    for i in range(len(route)-1)
-                ]
-                elevation_gain = sum(elevation_changes)
-                
-                if distance > 0:
-                    grades = [
-                        abs((graph.nodes[route[i+1]].get('elevation', 0) - graph.nodes[route[i]].get('elevation', 0)) / 
-                            min(edge_data.get('length', 1) for edge_data in graph.get_edge_data(route[i], route[i+1]).values()))
-                        for i in range(len(route)-1) if min(edge_data.get('length', 0) for edge_data in graph.get_edge_data(route[i], route[i+1]).values()) > 0 # Avoid division by zero
-                    ]
-                    if grades: # Ensure grades list is not empty
-                        avg_abs_grade = sum(grades) / len(grades) * 100
-            except Exception as e:
-                current_app.logger.warning(f"Error calculating elevation data for a route: {str(e)}")
+            # Extract values from features array: [distance, positive_grade, negative_grade, travel_time]
+            distance = float(features[0])
+            positive_grade = float(features[1]) 
+            negative_grade = float(features[2])
+            travel_time = float(features[3])
+            
+            # Calculate total elevation gain as sum of positive and negative grade changes
+            elevation_gain = positive_grade + negative_grade
+            
+            # Calculate average absolute grade as percentage
+            # Average the positive and negative grades (both are absolute values)
+            avg_abs_grade = (positive_grade + negative_grade) / 2.0 if (positive_grade + negative_grade) > 0 else 0.0
 
             left_turns, right_turns = osmnx_service.count_turns(route)
-            
-            travel_time = sum(
-                min(edge_data.get('travel_time', 0) for edge_data in graph.get_edge_data(u, v).values())
-                for u, v in zip(route[:-1], route[1:])
-            )
             
             source_coords = [graph.nodes[route[0]]['y'], graph.nodes[route[0]]['x']]
             dest_coords = [graph.nodes[route[-1]]['y'], graph.nodes[route[-1]]['x']]
@@ -217,6 +203,8 @@ def generate_routes():
                         "coordinates": coords,
                         "distance": float(distance),
                         "elevationGain": float(elevation_gain),
+                        "positiveGrade": float(positive_grade),
+                        "negativeGrade": float(negative_grade),
                         "avgGrade": float(avg_abs_grade),
                         "leftTurns": left_turns,
                         "rightTurns": right_turns,
@@ -393,11 +381,19 @@ def previous_answers():
         for pref in preferences:
             selected_route_details = None
             if pref.selected_route: # pref.selected_route is the relationship to GeneratedRoute
+                # Deserialize trajectory to get the original features
+                trajectory_obj = pickle.loads(pref.selected_route.trajectory_obj)
+                features = trajectory_obj.features
+                positive_grade = float(features[1])
+                negative_grade = float(features[2])
+                
                 selected_route_details = {
                     "id": pref.selected_route.id,
                     "route_guid": pref.selected_route.route_guid,
                     "distance": pref.selected_route.distance,
                     "elevationGain": pref.selected_route.elevation_gain,
+                    "positiveGrade": positive_grade,
+                    "negativeGrade": negative_grade,
                     "avgGrade": pref.selected_route.avg_grade,
                     "leftTurns": pref.selected_route.left_turns,
                     "rightTurns": pref.selected_route.right_turns,
@@ -414,11 +410,19 @@ def previous_answers():
                 # Assuming presented_routes_ids is a list of GeneratedRoute.id
                 presented_routes_objects = GeneratedRoute.query.filter(GeneratedRoute.id.in_(pref.presented_routes_ids)).all()
                 for route_obj in presented_routes_objects:
+                    # Deserialize trajectory to get the original features
+                    trajectory_obj = pickle.loads(route_obj.trajectory_obj)
+                    features = trajectory_obj.features
+                    positive_grade = float(features[1])
+                    negative_grade = float(features[2])
+                    
                     presented_routes_details.append({
                         "id": route_obj.id,
                         "route_guid": route_obj.route_guid,
                         "distance": route_obj.distance,
                         "elevationGain": route_obj.elevation_gain,
+                        "positiveGrade": positive_grade,
+                        "negativeGrade": negative_grade,
                         "avgGrade": route_obj.avg_grade,
                         "leftTurns": route_obj.left_turns,
                         "rightTurns": route_obj.right_turns,
