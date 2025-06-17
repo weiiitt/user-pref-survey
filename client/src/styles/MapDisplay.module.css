@@ -48,3 +48,8 @@ img.destinationMarker {
   opacity: 0.9; /* Leaflet default stroke opacity */
   transition: all 0.15s ease-in-out; 
 } 
+
+/* Simple approach - add transitions to all polylines */
+:global(.leaflet-container path.leaflet-interactive) {
+  transition: opacity 0.15s ease-in-out !important;
+} 

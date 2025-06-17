@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
-import logging
 import sys
+sys.stdout = sys.__stdout__  # Force stdout to be unbuffered
+import logging
 
 from flask import Flask, render_template, jsonify
 from flask_cors import CORS
@@ -26,7 +27,7 @@ def create_app(config_object="server.settings"):
     """
     app = Flask(__name__.split(".")[0])
     app.config.from_object(config_object)
-    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)  # Explicitly allow frontend origin
+    CORS(app, origins=["http://localhost:5173", "http://localhost:5174"], supports_credentials=True)  # Explicitly allow frontend origin
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)

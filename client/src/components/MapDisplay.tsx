@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, LayersControl, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import styles from '../styles/MapDisplay.module.css'; // Import CSS module
@@ -18,10 +18,6 @@ L.Icon.Default.mergeOptions({
     shadowUrl: shadowUrl,
 });
 
-// Define custom icons using L.Icon.Default with different classNames
-const sourceIcon = new L.Icon.Default({ className: `${styles.leafletMarkerIcon} ${styles.sourceMarker}` });
-const destinationIcon = new L.Icon.Default({ className: `${styles.leafletMarkerIcon} ${styles.destinationMarker}` });
-
 interface MapDisplayProps {
     routes: RouteResponse[];
     center?: [number, number];
@@ -32,6 +28,23 @@ interface MapDisplayProps {
 const MapDisplay: React.FC<MapDisplayProps> = ({ routes, center = [40.008279, -105.268985], zoom = 16, hoveredRoute }) => {
     // BaseLayer references for Layers control
     const { BaseLayer } = LayersControl;
+    
+    // Create icons inside the component to ensure CSS modules are loaded
+    const [sourceIcon, setSourceIcon] = useState<L.Icon.Default | null>(null);
+    const [destinationIcon, setDestinationIcon] = useState<L.Icon.Default | null>(null);
+
+    useEffect(() => {
+        // Create icons after component mounts to ensure CSS modules are ready
+        const source = new L.Icon.Default({ 
+            className: `${styles.leafletMarkerIcon} ${styles.sourceMarker}` 
+        });
+        const destination = new L.Icon.Default({ 
+            className: `${styles.leafletMarkerIcon} ${styles.destinationMarker}` 
+        });
+        
+        setSourceIcon(source);
+        setDestinationIcon(destination);
+    }, []);
 
     return (
         <MapContainer center={center} zoom={zoom} className={styles.mapContainer}>
@@ -55,29 +68,48 @@ const MapDisplay: React.FC<MapDisplayProps> = ({ routes, center = [40.008279, -1
                 const isOtherHovered = hoveredRoute !== null && hoveredRoute !== routeIdentifier;
                 const targetOpacity = isOtherHovered ? 0.1 : 0.9;
 
+                // Define styling directly in pathOptions for colors and weights
+                const casingStyle = index === 0 
+                    ? {
+                        color: '#0435D9',
+                        weight: 10,
+                        opacity: targetOpacity,
+                      }
+                    : {
+                        color: '#B6470C',
+                        weight: 10,
+                        opacity: targetOpacity,
+                      };
+                
+                const lineStyle = index === 0 
+                    ? {
+                        color: '#5076F3',
+                        weight: 6,
+                        opacity: targetOpacity,
+                      }
+                    : {
+                        color: '#F07939',
+                        weight: 6,
+                        opacity: targetOpacity,
+                      };
+
                 return (
                     <React.Fragment key={index}>
                         {/* Casing Polyline (outline) */}
                         <Polyline
-                            pathOptions={{
-                                className: index === 0 ? styles.customPolylineRouteA_casing : styles.customPolylineRouteB_casing,
-                                opacity: targetOpacity
-                            }}
+                            pathOptions={casingStyle}
                             positions={route.route.coordinates as [number, number][]}
                         />
                         {/* Main Polyline */}
                         <Polyline
-                            pathOptions={{
-                                className: index === 0 ? styles.customPolylineRouteA_line : styles.customPolylineRouteB_line,
-                                opacity: targetOpacity
-                            }}
+                            pathOptions={lineStyle}
                             positions={route.route.coordinates as [number, number][]}
                         />
                     </React.Fragment>
                 );
             })}
 
-            {routes.length > 0 && (
+            {routes.length > 0 && sourceIcon && destinationIcon && (
                 <>
                     <Marker position={routes[0].source.coordinates as [number, number]} icon={sourceIcon}>
                         <Popup>Source</Popup>

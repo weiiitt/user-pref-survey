@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 import uuid
 import pickle # Added for belief serialization
+import traceback
 
 from server.database import db
 from server.extensions import login_manager, csrf_protect
@@ -249,6 +250,7 @@ def generate_routes():
         
     except Exception as e:
         current_app.logger.error(f"Error generating routes: {str(e)}")
+        current_app.logger.error(f"Full traceback: {traceback.format_exc()}")
         db.session.rollback() 
         return jsonify({"error": str(e)}), 500
 
