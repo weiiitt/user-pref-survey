@@ -40,7 +40,8 @@ function Survey({ questionNumber, selectedAnswer, routes, onAnswerChange }: Surv
                             <h3>Blue Route</h3>
                             <ul>
                                 <li>Distance: {routes?.[0].route.distance.toFixed(2)} meters</li>
-                                <li>Average Grade: {routes?.[0].route.avgGrade.toFixed(2)}%</li>
+                                <li>Positive Grade: {routes?.[0].route.positiveGrade.toFixed(2)}%</li>
+                                <li>Negative Grade: {routes?.[0].route.negativeGrade.toFixed(2)}%</li>
                                 <li>Total Turns: {routes?.[0] && routes?.[0].route.leftTurns + routes?.[0].route.rightTurns}</li>
                                 <li>Travel Time: {routes?.[0].route.travelTime.toFixed(2)} seconds</li>
                             </ul>
