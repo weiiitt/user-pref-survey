@@ -58,3 +58,5 @@ env/
 *.db
 
 cache/
+
+assets/user_study/

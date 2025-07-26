@@ -26,6 +26,15 @@ def create_app(config_object="server.settings"):
     :param config_object: The configuration object to use.
     """
     app = Flask(__name__.split(".")[0])
+    
+        # Enable CORS for specific origins
+    CORS(
+        app,
+        resources={
+            r"/*": {"origins": ["http://localhost:5173", "http://localhost:5174"]}
+        },
+    )
+    
     app.config.from_object(config_object)
     CORS(app, origins=["http://localhost:5173", "http://localhost:5174"], supports_credentials=True)  # Explicitly allow frontend origin
     register_extensions(app)
