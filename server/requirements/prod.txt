@@ -47,20 +47,3 @@ pandas==2.2.0
 numpy==1.26.3
 
 # APReL
-numpy>=1.8.0
-moviepy>=1.0.0
-scipy
-gym
-pygame
-bayesian-optimization
-pymdptoolbox
-dill
-imgkit
-selenium
-matplotlib
-opencv-python
-torch
-torchvision
-torchaudio
-gymnasium==0.29.1
-folium

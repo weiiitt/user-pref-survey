@@ -1,0 +1,57 @@
+.navbar {
+    background-color: var(--container-color);
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: min(95vw, 1400px);
+    margin: 0 auto;
+    padding: 0 12px;
+}
+
+.participant-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.participant-label {
+    color: var(--text-color);
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+.participant-id {
+    color: var(--text-color);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.logout-button {
+    background-color: var(--button-color);
+    color: var(--text-color);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.logout-button:hover {
+    background-color: var(--button-highlight-color);
+} 

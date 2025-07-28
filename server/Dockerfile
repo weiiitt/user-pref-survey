@@ -16,12 +16,8 @@ COPY requirements requirements
 COPY server server
 
 RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    libsm6 \
-    libxext6 \
-    imagemagick \
+    sqlite3 \
     python3-numpy \
-    python3-decorator \
     python3-setuptools \
     python3-pip \
     python3-dev \
@@ -29,10 +25,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install moviepy separately with specific version before other requirements
-RUN pip install --no-cache "decorator>=4.0.11" "numpy>=1.17.3" "imageio>=2.5,<3.0" "imageio-ffmpeg>=0.4.0" "tqdm>=4.11.2" "proglog<=1.0.0" "moviepy==1.0.3"
 RUN pip install --no-cache -r requirements/prod.txt
-RUN pip install --no-cache ./server/services/APReL
 
 COPY package.json ./
 RUN npm install
@@ -58,12 +51,7 @@ COPY server server
 COPY . .
 
 RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    libsm6 \
-    libxext6 \
-    imagemagick \
     python3-numpy \
-    python3-decorator \
     python3-setuptools \
     python3-pip \
     python3-dev \
@@ -71,12 +59,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install moviepy separately with specific version before other requirements
-RUN pip install --no-cache --user "decorator>=4.0.11" "numpy>=1.17.3" "imageio>=2.5,<3.0" "imageio-ffmpeg>=0.4.0" "tqdm>=4.11.2" "proglog<=1.0.0" "moviepy==1.0.3"
 RUN pip install --no-cache --user -r requirements/prod.txt
-RUN pip install --no-cache ./server/services/APReL
-
-# COPY --from=builder --chown=sid:sid /app/server/static /app/server/static
 
 RUN chown -R sid:sid /app
 USER sid
@@ -93,12 +76,8 @@ CMD ["-c", "/etc/supervisor/supervisord.conf"]
 FROM builder AS development
 
 RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    libsm6 \
-    libxext6 \
-    imagemagick \
+    sqlite3 \
     python3-numpy \
-    python3-decorator \
     python3-setuptools \
     python3-pip \
     python3-dev \
@@ -106,10 +85,8 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install moviepy separately with specific version before other requirements
-RUN pip install --no-cache "decorator>=4.0.11" "numpy>=1.17.3" "imageio>=2.5,<3.0" "imageio-ffmpeg>=0.4.0" "tqdm>=4.11.2" "proglog<=1.0.0" "moviepy==1.0.3"
 RUN pip install --no-cache -r requirements/dev.txt
-RUN pip install --no-cache -e ./server/services/APReL
+
 EXPOSE 2992
 EXPOSE 5000
 CMD [ "npm", "start" ]

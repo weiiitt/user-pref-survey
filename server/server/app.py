@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
-import logging
 import sys
+sys.stdout = sys.__stdout__  # Force stdout to be unbuffered
+import logging
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 
 from server import commands, public, user
@@ -25,8 +26,10 @@ def create_app(config_object="server.settings"):
     :param config_object: The configuration object to use.
     """
     app = Flask(__name__.split(".")[0])
+    
+        # Enable CORS for specific origins
     app.config.from_object(config_object)
-    CORS(app, origins=["http://localhost:5173"], supports_credentials=True)  # Explicitly allow frontend origin
+    CORS(app, origins=["http://localhost:5173", "http://localhost:5174"], supports_credentials=True)  # Allow frontend origins
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)
@@ -59,20 +62,34 @@ def register_blueprints(app):
     """Register Flask blueprints."""
     app.register_blueprint(public.views.blueprint)
     app.register_blueprint(user.views.blueprint)
+    
+    # Debug: Try to import and register API blueprint
+    try:
+        from server import api
+        app.register_blueprint(api.api)
+        app.logger.info("API blueprint registered successfully")
+    except Exception as e:
+        app.logger.error(f"Failed to register API blueprint: {e}")
+    
     return None
 
 
 def register_errorhandlers(app):
     """Register error handlers."""
 
-    def render_error(error):
-        """Render error template."""
-        # If a HTTPException, pull the `code` attribute; default to 500
+    def json_error(error):
+        """Return JSON error for API routes, template for others."""
         error_code = getattr(error, "code", 500)
-        return render_template(f"{error_code}.html"), error_code
+        
+        # For API routes, return JSON
+        if request.path.startswith('/api/'):
+            return jsonify({"error": f"HTTP {error_code}", "message": str(error)}), error_code
+        
+        # For other routes, return simple text (no templates)
+        return f"Error {error_code}", error_code
 
     for errcode in [401, 404, 500]:
-        app.errorhandler(errcode)(render_error)
+        app.errorhandler(errcode)(json_error)
     return None
 
 

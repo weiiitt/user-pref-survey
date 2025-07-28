@@ -56,3 +56,7 @@ env/
 
 # Development database
 *.db
+
+cache/
+
+assets/user_study/
