@@ -64,7 +64,9 @@ class UserTestProgress(PkModel):
     test_type = Column(db.String(20), nullable=False)  # "tabletop" or "robot_nav"
     condition_number = Column(db.Integer, nullable=False)  # 0, 1, or 2
     choices = Column(db.JSON, nullable=False, default=list)  # [1, 0, 1, 1, ...]
+    response_times = Column(db.JSON, nullable=False, default=list)  # [2.5, 3.1, 1.8, ...] in seconds
     completed = Column(db.Boolean, default=False)
+    inter_round_survey_completed = Column(db.Boolean, default=False)
     
     user = relationship("User", backref="test_progress")
     

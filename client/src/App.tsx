@@ -1,30 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import SurveyPage from './pages/SurveyPage'
 import LandingPage from './pages/LandingPage'
+import PreActivityPage from './pages/PreActivityPage'
 import './styles/App.css'
-import { useEffect, useState } from 'react'
-import { checkLoginStatus } from './utils/api'
-import HistoryPage from './pages/History';
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 
-
-function App() {
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-
-	useEffect(() => {
-		const checkLogin = async () => {
-			try {
-				const loggedIn = await checkLoginStatus();
-				setIsLoggedIn(loggedIn);
-			} catch (error) {
-				console.error('Error checking login status:', error);
-				setIsLoggedIn(false);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-		checkLogin();
-	}, []);
+function AppRoutes() {
+	const { isLoggedIn, isLoading, login } = useAuth();
 
 	if (isLoading) {
 		return <div>Loading...</div>;
@@ -37,9 +19,19 @@ function App() {
 					path="/"
 					element={
 						isLoggedIn ? (
-							<Navigate to="/survey" replace />
+							<Navigate to="/pre-activity" replace />
 						) : (
-							<LandingPage onLoginSuccess={() => setIsLoggedIn(true)} />
+							<LandingPage onLoginSuccess={login} />
+						)
+					}
+				/>
+				<Route
+					path="/pre-activity"
+					element={
+						isLoggedIn ? (
+							<PreActivityPage />
+						) : (
+							<Navigate to="/" replace />
 						)
 					}
 				/>
@@ -53,18 +45,16 @@ function App() {
 						)
 					}
 				/>
-				<Route
-					path="/history"
-					element={
-						isLoggedIn ? (
-							<HistoryPage />
-						) : (
-							<Navigate to="/" replace />
-						)
-					}
-				/>
 			</Routes>
 		</Router>
+	)
+}
+
+function App() {
+	return (
+		<AuthProvider>
+			<AppRoutes />
+		</AuthProvider>
 	)
 }
 
