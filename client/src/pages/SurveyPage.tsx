@@ -16,7 +16,6 @@ interface QuestionData {
 function SurveyPage() {
 	const navigate = useNavigate();
 	const [questionData, setQuestionData] = useState<QuestionData | null>(null);
-	const [participantId, setParticipantId] = useState<string>('');
 	const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 	const [progress, setProgress] = useState(0);
 
@@ -93,7 +92,7 @@ function SurveyPage() {
 			console.error('Error loading question:', error);
 			// Check if it's a user not found or authentication error
 			if (error.response?.status === 404 || error.response?.status === 401) {
-				window.location.href = '/';
+				navigate('/');
 			} else if (error.response?.status === 202) {
 				// Inter-round survey pending
 				navigate('/inter-round-survey');
@@ -175,7 +174,6 @@ function SurveyPage() {
 				
 				// Set participant ID from auth context or session
 				// We'll get this from the auth context instead of the API call
-				setParticipantId('authenticated'); // Temporary - will be updated by loadQuestion
 			} catch (error) {
 				console.error('Error checking survey status:', error);
 				// Don't redirect on error - let the auth context handle authentication redirects

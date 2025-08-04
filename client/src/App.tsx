@@ -21,7 +21,7 @@ function AppRoutes() {
 					path="/"
 					element={
 						isLoggedIn ? (
-							<Navigate to="/pre-activity" replace />
+							<Navigate to="pre-activity" replace />
 						) : (
 							<LandingPage onLoginSuccess={login} />
 						)
