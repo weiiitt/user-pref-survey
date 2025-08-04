@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import '../styles/LandingPage.css';
 import Navbar from '../components/Navbar';
-import { submitPreActivitySurvey, checkPreActivitySurvey, checkLoginStatus } from '../utils/api';
+import { submitPreActivitySurvey, checkPreActivitySurvey } from '../utils/api';
 
 function PreActivityPage() {
     const navigate = useNavigate();
@@ -13,18 +13,11 @@ function PreActivityPage() {
     const [error, setError] = useState<string>('');
     const [isChecking, setIsChecking] = useState<boolean>(true);
 
-    // Check login status and survey completion on page load
+    // Check survey completion on page load (login is already handled by AuthContext)
     useEffect(() => {
-        const checkStatus = async () => {
+        const checkSurveyStatus = async () => {
             try {
-                // First check if user is logged in
-                const loginStatus = await checkLoginStatus();
-                if (!loginStatus.isLoggedIn) {
-                    navigate('/');
-                    return;
-                }
-
-                // Then check if pre-activity survey is already completed
+                // Check if pre-activity survey is already completed
                 const surveyStatus = await checkPreActivitySurvey();
                 if (surveyStatus.completed) {
                     // Already completed, redirect to survey page
@@ -46,15 +39,16 @@ function PreActivityPage() {
                     }
                 }
             } catch (error) {
-                console.error('Error checking status:', error);
-                navigate('/');
+                console.error('Error checking survey status:', error);
+                // Don't redirect on error - let user try to fill out the form
+                setError('Error loading survey status. Please try submitting the form.');
             } finally {
                 setIsChecking(false);
             }
         };
 
-        checkStatus();
-    }, [navigate]);
+        checkSurveyStatus();
+    }, []); // Remove navigate from dependencies since we only want this to run once
 
     const handleSubmitSurvey = async () => {
         setError('');

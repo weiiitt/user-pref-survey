@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import '../styles/InterRoundSurveyPage.css';
 import Navbar from '../components/Navbar';
-import { submitInterRoundSurvey, checkLoginStatus } from '../utils/api';
+import { submitInterRoundSurvey } from '../utils/api';
 
 function InterRoundSurveyPage() {
     const navigate = useNavigate();
@@ -19,26 +19,11 @@ function InterRoundSurveyPage() {
     const [error, setError] = useState<string>('');
     const [isChecking, setIsChecking] = useState<boolean>(true);
 
-    // Check login status on page load
+    // Component initialization (login is already handled by AuthContext)
     useEffect(() => {
-        const checkStatus = async () => {
-            try {
-                // Check if user is logged in
-                const loginStatus = await checkLoginStatus();
-                if (!loginStatus.isLoggedIn) {
-                    navigate('/');
-                    return;
-                }
-            } catch (error) {
-                console.error('Error checking status:', error);
-                navigate('/');
-            } finally {
-                setIsChecking(false);
-            }
-        };
-
-        checkStatus();
-    }, [navigate]);
+        // Just set the component as ready since authentication is handled by AuthContext
+        setIsChecking(false);
+    }, []); // Remove navigate from dependencies since we only want this to run once
 
     const handleResponseChange = (field: string, value: number | string) => {
         setResponses(prev => ({ ...prev, [field]: value }));
