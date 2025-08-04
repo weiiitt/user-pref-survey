@@ -145,30 +145,6 @@ def calculate_user_progress_internal(user):
         "total_questions": total_questions
     }
 
-@api.route("/test", methods=["GET"])
-@cross_origin(supports_credentials=True)
-@csrf_protect.exempt
-def test_route():
-    return jsonify({"message": "API working!"})
-
-@api.route("/get-survey-config", methods=["GET"])
-@cross_origin(supports_credentials=True)
-@csrf_protect.exempt
-def get_survey_config():
-    """Returns dynamic survey configuration based on available assets"""
-    structure = get_survey_structure()
-    
-    tabletop_total = sum(structure["tabletop"].values())
-    robot_nav_total = sum(structure["robot_nav"].values())
-    total_questions = tabletop_total + robot_nav_total
-    
-    return jsonify({
-        "total_questions": total_questions,
-        "tabletop_questions": tabletop_total,
-        "robot_nav_questions": robot_nav_total,
-        "structure": structure
-    })
-
 
 
 @api.route("/get-question-images", methods=["GET"])
@@ -459,12 +435,14 @@ def check_pre_activity_survey():
     """Check if user has completed pre-activity survey (age and sex filled)"""
     participant_id = session.get('user_id')
     
+    current_app.logger.info(f"Checking pre-activity survey for user: {participant_id}")
+    
     if not participant_id:
         return jsonify({"error": "Not logged in"}), 403
     
     user = User.query.filter_by(participant_id=participant_id).first()
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"error": "User not found"}), 403
     
     # Check if both age and sex are filled
     is_completed = user.age is not None and user.sex is not None and user.sex.strip() != ""
