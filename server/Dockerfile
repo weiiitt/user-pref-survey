@@ -59,13 +59,14 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache --user -r requirements/prod.txt
+RUN pip install --no-cache -r requirements/prod.txt
+
+# Copy supervisord configuration files before switching to non-root user
+COPY supervisord.conf /etc/supervisor/supervisord.conf
+COPY supervisord_programs /etc/supervisor/conf.d
 
 RUN chown -R sid:sid /app
 USER sid
-
-COPY supervisord.conf /etc/supervisor/supervisord.conf
-COPY supervisord_programs /etc/supervisor/conf.d
 
 EXPOSE 5000
 ENTRYPOINT ["/bin/bash", "shell_scripts/supervisord_entrypoint.sh"]

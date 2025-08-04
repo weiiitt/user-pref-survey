@@ -29,7 +29,7 @@ def create_app(config_object="server.settings"):
     
         # Enable CORS for specific origins
     app.config.from_object(config_object)
-    CORS(app, origins=["http://localhost:5173", "http://localhost:5174"], supports_credentials=True)  # Allow frontend origins
+    CORS(app, origins=["http://localhost:5173", "http://localhost:5174", "https://weiiitt.github.io/user-pref-survey"], supports_credentials=True)  # Allow frontend origins
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)
