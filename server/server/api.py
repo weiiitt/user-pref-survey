@@ -34,7 +34,7 @@ def get_survey_structure():
     except Exception as e:
         current_app.logger.error(f"Error scanning survey structure: {e}")
         # Fall back to defaults if scanning fails
-        structure = {"tabletop": {0: 10, 1: 10, 2: 10}, "robot_nav": {0: 10, 1: 10, 2: 10}}
+        structure = {"tabletop": {0: 5, 1: 5, 2: 5}, "robot_nav": {0: 5, 1: 5, 2: 5}}
     
     return structure
 
@@ -266,17 +266,12 @@ def get_question_images():
     with open(image2_path, "rb") as img2_file:
         image2_data = base64.b64encode(img2_file.read()).decode('utf-8')
     
-    # Add progress calculation to question data
-    progress_data = calculate_user_progress_internal(user)
-    
     return jsonify({
         "image1": f"data:image/png;base64,{image1_data}",
         "image2": f"data:image/png;base64,{image2_data}",
         "test_type": test_type,
-        "condition": condition,
+        "condition": user.current_condition_index,
         "question_num": question_num,
-        "current_progress": progress_data["current_progress"],
-        "total_questions": progress_data["total_questions"]
     })
 
 @api.route("/submit-choice", methods=["POST"])

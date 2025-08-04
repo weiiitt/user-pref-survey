@@ -26,8 +26,8 @@ function SurveyPage() {
 	const [pausedTime, setPausedTime] = useState<number>(0);
 	const [lastTestType, setLastTestType] = useState<string | null>(null);
 	const [hasShownInstructionsForSession, setHasShownInstructionsForSession] = useState(false);
-	const [totalQuestions, setTotalQuestions] = useState(60);
-	const [surveyStructure, setSurveyStructure] = useState<{tabletop: Record<number, number>; robot_nav: Record<number, number>}>({tabletop: {}, robot_nav: {}});
+	const [totalQuestions, setTotalQuestions] = useState(30);
+	const [structure, setStructure] = useState<Record<string, Record<number, number>>>({});
 
 	const loadQuestion = async () => {
 		try {
@@ -61,19 +61,10 @@ function SurveyPage() {
 				setIsPaused(false);
 				setPausedTime(0);
 			}
+		
+						setSelectedChoice(null);
+
 			
-			// Use progress from server (included in question data)
-			if (data.current_progress) {
-				setProgress(data.current_progress);
-			} else {
-				// Fallback for old data format
-				setProgress(data.question_num + 1);
-			}
-			
-			if (data.total_questions) {
-				setTotalQuestions(data.total_questions);
-			}
-			setSelectedChoice(null);
 		} catch (error: any) {
 			console.error('Error loading question:', error);
 			// Check if it's a user not found or authentication error
@@ -147,31 +138,34 @@ function SurveyPage() {
 		}
 	};
 
+	// Combined initialization effect - runs once on mount
 	useEffect(() => {
 		const initializePage = async () => {
 			try {
-				// Check if pre-activity survey is completed (login is already handled by AuthContext)
+				// Check if pre-activity survey is completed
 				const surveyStatus = await checkPreActivitySurvey();
 				if (!surveyStatus.completed) {
-					// Pre-activity survey not completed, redirect to pre-activity page
 					navigate('/pre-activity');
 					return;
 				}
 				
-				// Set participant ID from auth context or session
-				// We'll get this from the auth context instead of the API call
+				// Load survey config
+				const config = await fetchSurveyConfig();
+				setTotalQuestions(config.total_questions);
+				setStructure(config.structure);
+				
+				// Reset instructions flag
+				setHasShownInstructionsForSession(false);
+				
+				// Load first question
+				loadQuestion();
+				
 			} catch (error) {
-				console.error('Error checking survey status:', error);
-				// Don't redirect on error - let the auth context handle authentication redirects
+				console.error('Error initializing survey page:', error);
 			}
 		};
 		
 		initializePage();
-	}, []); // Remove navigate from dependencies since we only want this to run once
-
-	useEffect(() => {
-		// Load first question immediately since we know user is authenticated
-		loadQuestion();
 	}, []);
 
 	// Timer effect - updates every 100ms when timing is active
@@ -187,23 +181,43 @@ function SurveyPage() {
 		};
 	}, [questionStartTime, showInstructions, selectedChoice, isPaused]);
 
-	// Reset instructions flag when page loads (user returns to site)
-	// Load survey config on mount
+	// Calculate progress when structure or questionData updates
 	useEffect(() => {
-		const loadConfig = async () => {
-			try {
-				const config = await fetchSurveyConfig();
-				setTotalQuestions(config.total_questions);
-				setSurveyStructure(config.structure);
-			} catch (error) {
-				console.error('Error loading survey config:', error);
-				// Keep default values on error
-			}
-		};
+		if (!questionData || !structure.tabletop || !structure.robot_nav) return;
+
+		const conditionNum = questionData.condition;
+		const questionNum = questionData.question_num;
+		const testType = questionData.test_type;
 		
-		setHasShownInstructionsForSession(false);
-		loadConfig();
-	}, []);
+		let currentProgress = 0;
+		
+		if (testType === "tabletop") {
+			// Add questions from completed tabletop conditions
+			Object.keys(structure.tabletop).forEach(cond => {
+				const condNum = parseInt(cond);
+				if (condNum < conditionNum) {
+					currentProgress += structure.tabletop[condNum];
+				}
+			});
+			// Add current question progress
+			currentProgress += questionNum + 1; // +1 because questionNum is 0-indexed
+		} else if (testType === "robot_nav") {
+			// Add ALL tabletop questions (completed)
+			currentProgress += Object.values(structure.tabletop).reduce((sum, count) => sum + count, 0);
+			
+			// Add questions from completed robot_nav conditions
+			Object.keys(structure.robot_nav).forEach(cond => {
+				const condNum = parseInt(cond);
+				if (condNum < conditionNum) {
+					currentProgress += structure.robot_nav[condNum];
+				}
+			});
+			// Add current question progress
+			currentProgress += questionNum + 1; // +1 because questionNum is 0-indexed
+		}
+		
+		setProgress(currentProgress);
+	}, [structure, questionData]);
 
 
 

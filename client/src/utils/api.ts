@@ -38,7 +38,6 @@ interface QuestionImagesResponse {
   condition: number;
   question_num: number;
   current_progress?: number;
-  total_questions?: number;
   error?: string;
   show_inter_round_survey?: boolean;
   pending_survey_test_type?: string;
