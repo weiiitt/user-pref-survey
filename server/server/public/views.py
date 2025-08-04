@@ -144,4 +144,4 @@ def check_login():
         participant_id = session.get('user_id')
         return jsonify({"message": "User is logged in.", "participant_id": participant_id}), 200
     else:
-        return jsonify({"message": "User is not logged in."}), 401
+        return jsonify({"message": "User is not logged in."}), 403

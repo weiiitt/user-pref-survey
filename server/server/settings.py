@@ -23,3 +23,8 @@ CACHE_TYPE = (
     "flask_caching.backends.SimpleCache"  # Can be "MemcachedCache", "RedisCache", etc.
 )
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# Session cookie configuration for GitHub Pages -> ngrok -> server
+SESSION_COOKIE_SAMESITE = env.str("SESSION_COOKIE_SAMESITE", default="None")
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=True)
+SESSION_COOKIE_HTTPONLY = env.bool("SESSION_COOKIE_HTTPONLY", default=True)

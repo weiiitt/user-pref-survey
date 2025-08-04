@@ -50,7 +50,7 @@ def register_extensions(app):
     # Define a custom unauthorized handler for Flask-Login
     @login_manager.unauthorized_handler
     def unauthorized():
-        return jsonify(message="Authentication required."), 401
+        return jsonify(message="Authentication required."), 403
 
     debug_toolbar.init_app(app)
     migrate.init_app(app, db)
