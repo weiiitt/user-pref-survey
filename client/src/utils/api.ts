@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import type { PreviousAnswer, RouteResponse } from '../types/APIResponses';
 
-export const API_URL = 'http://parts-power.gl.at.ply.gg:39182';
+export const API_URL = 'https://minnow-tolerant-usefully.ngrok-free.app';
 
 interface RandomRoutesResponse {
   routes: RouteResponse[];

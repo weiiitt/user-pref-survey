@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchQuestionImages, submitChoice, checkLoginStatus, fetchSurveyConfig, checkPreActivitySurvey } from '../utils/api';
+import { fetchQuestionImages, submitChoice, fetchSurveyConfig, checkPreActivitySurvey } from '../utils/api';
 import '../styles/SurveyPage.css';
 import Navbar from '../components/Navbar';
 import InstructionsPopup from '../components/InstructionsPopup';
@@ -165,35 +165,30 @@ function SurveyPage() {
 	useEffect(() => {
 		const initializePage = async () => {
 			try {
-				const loginStatus = await checkLoginStatus();
-				if (loginStatus.isLoggedIn && loginStatus.participantId) {
-					// Check if pre-activity survey is completed
-					const surveyStatus = await checkPreActivitySurvey();
-					if (!surveyStatus.completed) {
-						// Pre-activity survey not completed, redirect to pre-activity page
-						navigate('/pre-activity');
-						return;
-					}
-					
-					setParticipantId(loginStatus.participantId);
-				} else {
-					// Redirect to landing page if not logged in
-					window.location.href = '/';
+				// Check if pre-activity survey is completed (login is already handled by AuthContext)
+				const surveyStatus = await checkPreActivitySurvey();
+				if (!surveyStatus.completed) {
+					// Pre-activity survey not completed, redirect to pre-activity page
+					navigate('/pre-activity');
+					return;
 				}
+				
+				// Set participant ID from auth context or session
+				// We'll get this from the auth context instead of the API call
+				setParticipantId('authenticated'); // Temporary - will be updated by loadQuestion
 			} catch (error) {
-				console.error('Error checking status:', error);
-				window.location.href = '/';
+				console.error('Error checking survey status:', error);
+				// Don't redirect on error - let the auth context handle authentication redirects
 			}
 		};
 		
 		initializePage();
-	}, [navigate]);
+	}, []); // Remove navigate from dependencies since we only want this to run once
 
 	useEffect(() => {
-		if (participantId) {
-			loadQuestion();
-		}
-	}, [participantId]);
+		// Load first question immediately since we know user is authenticated
+		loadQuestion();
+	}, []);
 
 	// Timer effect - updates every 100ms when timing is active
 	useEffect(() => {

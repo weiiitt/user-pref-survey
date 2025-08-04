@@ -15,7 +15,7 @@ function AppRoutes() {
 	}
 
 	return (
-		<Router>
+		<Router basename="/user-pref-survey">
 			<Routes>
 				<Route
 					path="/"
