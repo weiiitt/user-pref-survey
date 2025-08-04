@@ -211,55 +211,56 @@ function SurveyPage() {
 
 
 
-
-	if (!questionData) {
-		return <div>Error loading question data</div>;
-	}
-
 	return (
 		<div className="survey-container">
-			<Navbar onShowInstructions={handleShowInstructions} timer={questionStartTime !== null && !showInstructions ? currentTime : null} onPause={handlePause} isPaused={isPaused} />
-			{/* Progress Bar */}
-			<div className="progress-section">
-				<div className="progress-info">
-					<span>{questionData.test_type === "tabletop" ? "Table-top" : "Robot Navigation"} - Condition {questionData.condition + 1}</span>
-					<span>{progress} / {totalQuestions}</span>
-				</div>
-				<div className="progress-bar">
-					<div 
-						className="progress-fill" 
-						style={{ width: `${(progress / totalQuestions) * 100}%` }}
-					></div>
-				</div>
-			</div>
+			{!questionData ? (
+				<div>Loading... (if this persists, please refresh the page)</div>
+			) : (
+				<>
+					<Navbar onShowInstructions={handleShowInstructions} timer={questionStartTime !== null && !showInstructions ? currentTime : null} onPause={handlePause} isPaused={isPaused} />
+					{/* Progress Bar */}
+					<div className="progress-section">
+						<div className="progress-info">
+							<span>{questionData.test_type === "tabletop" ? "Table-top" : "Robot Navigation"} - Condition {questionData.condition + 1}</span>
+							<span>{progress} / {totalQuestions}</span>
+						</div>
+						<div className="progress-bar">
+							<div 
+								className="progress-fill" 
+								style={{ width: `${(progress / totalQuestions) * 100}%` }}
+							></div>
+						</div>
+					</div>
 
-			{/* Question Content */}
-			<div className="question-content">
-				<h2>Question {questionData.question_num + 1}</h2>
-				<p>Click on an image to select your preferred trajectory</p>
-				
-				<div className={`images-section ${selectedChoice !== null ? 'processing' : ''} ${isPaused ? 'paused' : ''}`}>
-					<div 
-						className={`image-container ${selectedChoice === 0 ? 'selected' : ''}`}
-						onClick={() => handleChoiceSelect(0)}
-					>
-						<img src={questionData.image1} alt="Route Option 1" />
-						<div className="image-label">Option 1</div>
+					{/* Question Content */}
+					<div className="question-content">
+						<h2>Question {questionData.question_num + 1}</h2>
+						<p>Click on an image to select your preferred trajectory</p>
+						
+						<div className={`images-section ${selectedChoice !== null ? 'processing' : ''} ${isPaused ? 'paused' : ''}`}>
+							<div 
+								className={`image-container ${selectedChoice === 0 ? 'selected' : ''}`}
+								onClick={() => handleChoiceSelect(0)}
+							>
+								<img src={questionData.image1} alt="Route Option 1" />
+								<div className="image-label">Option 1</div>
+							</div>
+							<div 
+								className={`image-container ${selectedChoice === 1 ? 'selected' : ''}`}
+								onClick={() => handleChoiceSelect(1)}
+							>
+								<img src={questionData.image2} alt="Route Option 2" />
+								<div className="image-label">Option 2</div>
+							</div>
+						</div>
 					</div>
-					<div 
-						className={`image-container ${selectedChoice === 1 ? 'selected' : ''}`}
-						onClick={() => handleChoiceSelect(1)}
-					>
-						<img src={questionData.image2} alt="Route Option 2" />
-						<div className="image-label">Option 2</div>
-					</div>
-				</div>
-			</div>
-			<InstructionsPopup 
-				isVisible={showInstructions}
-				onClose={handleCloseInstructions}
-				testType={questionData.test_type}
-			/>
+					<InstructionsPopup 
+						isVisible={showInstructions}
+						onClose={handleCloseInstructions}
+						testType={questionData.test_type}
+					/>
+				</>
+			)}
 		</div>
 	);
 
