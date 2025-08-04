@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchQuestionImages, submitChoice, fetchSurveyConfig, checkPreActivitySurvey } from '../utils/api';
+import { fetchQuestionImages, submitChoice, fetchSurveyConfig, checkPreActivitySurvey, fetchUserProgress } from '../utils/api';
 import '../styles/SurveyPage.css';
 import Navbar from '../components/Navbar';
 import InstructionsPopup from '../components/InstructionsPopup';
@@ -62,30 +62,20 @@ function SurveyPage() {
 				setPausedTime(0);
 			}
 			
-			// Calculate progress dynamically - only if structure is loaded
-			if (Object.keys(surveyStructure.tabletop).length > 0 || Object.keys(surveyStructure.robot_nav).length > 0) {
-				let currentProgress = 0;
-				if (data.test_type === "tabletop") {
-					// Sum questions from completed tabletop conditions + current progress
-					const completedTabletop = Object.keys(surveyStructure.tabletop)
-						.filter(c => parseInt(c) < data.condition)
-						.reduce((sum, c) => sum + surveyStructure.tabletop[parseInt(c)], 0);
-					currentProgress = completedTabletop + data.question_num;
-				} else {
-					// All tabletop + completed robot_nav + current progress
-					const tabletopTotal = Object.values(surveyStructure.tabletop).reduce((sum, count) => sum + count, 0);
-					const completedRobotNav = Object.keys(surveyStructure.robot_nav)
-						.filter(c => parseInt(c) < data.condition)
-						.reduce((sum, c) => sum + surveyStructure.robot_nav[parseInt(c)], 0);
-					currentProgress = tabletopTotal + completedRobotNav + data.question_num;
-				}
-				setProgress(currentProgress);
+			// Get accurate progress from server (handles randomized condition orders)
+			const totalQuestions = Object.values(surveyStructure.tabletop).reduce((sum, count) => sum + count, 0) +
+								 Object.values(surveyStructure.robot_nav).reduce((sum, count) => sum + count, 0);
+			
+			if (totalQuestions > 0) {
+				fetchUserProgress(sessionStorage.getItem('user_id') || '').then(progressData => {
+					const currentProgress = Math.round(progressData.percent_answered * totalQuestions);
+					setProgress(currentProgress);
+				}).catch(() => {
+					// Fallback: just use current question number
+					setProgress(data.question_num + 1);
+				});
 			} else {
-				// Fallback calculation while structure is loading
-				const fallbackProgress = data.test_type === "tabletop" 
-					? data.condition * 10 + data.question_num
-					: 30 + data.condition * 10 + data.question_num;
-				setProgress(fallbackProgress);
+				setProgress(data.question_num + 1);
 			}
 			setSelectedChoice(null);
 		} catch (error: any) {

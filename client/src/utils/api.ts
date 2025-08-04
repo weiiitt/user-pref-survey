@@ -328,3 +328,30 @@ export const submitPreActivitySurvey = async (age: number, sex: string): Promise
 export const generateParticipantId = (): string => {
   return Math.floor(Math.random() * 10000).toString().padStart(4, '0');
 };
+
+interface UserProgressResponse {
+  percent_answered: number;
+}
+
+/**
+ * Fetches user progress with accurate randomized order calculation
+ * @param userId - User ID
+ * @returns Promise containing progress percentage
+ */
+export const fetchUserProgress = async (userId: string): Promise<UserProgressResponse> => {
+  try {
+    const response = await axios.get<UserProgressResponse>(
+      `${API_URL}/api/get-user-progress?user_id=${userId}`,
+      { 
+        withCredentials: true,
+        headers: {
+          'ngrok-skip-browser-warning': 'true'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[api.ts] Error fetching user progress:', error);
+    throw error;
+  }
+};
