@@ -12,7 +12,7 @@ interface NavbarProps {
 
 export default function Navbar({ onShowInstructions, timer, onPause, isPaused }: NavbarProps) {
     const navigate = useNavigate();
-    const { participantId, logout } = useAuth();
+    const { user, logout } = useAuth();
 
     const handleLogout = async () => {
         try {
@@ -28,7 +28,7 @@ export default function Navbar({ onShowInstructions, timer, onPause, isPaused }:
             <div className="navbar-content">
                 <div className="participant-info">
                     <span className="participant-label">Participant ID:</span>
-                    <span className="participant-id">{participantId || 'Loading...'}</span>
+                    <span className="participant-id">{user?.id || 'Loading...'}</span>
                     {timer !== null && timer !== undefined && (
                         <div className="timer-info">
                             <span className="timer-value">

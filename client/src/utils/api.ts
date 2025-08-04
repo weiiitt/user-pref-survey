@@ -3,6 +3,19 @@ import type { PreviousAnswer, RouteResponse } from '../types/APIResponses';
 
 export const API_URL = 'https://minnow-tolerant-usefully.ngrok-free.app';
 
+// Add a request interceptor
+axios.interceptors.request.use(
+  config => {
+    // Add the ngrok-skip-browser-warning header
+    config.headers['ngrok-skip-browser-warning'] = 'true';
+    return config;
+  },
+  error => {
+    // Do something with request error
+    return Promise.reject(error);
+  }
+);
+
 interface RandomRoutesResponse {
   routes: RouteResponse[];
 }
@@ -335,18 +348,14 @@ interface UserProgressResponse {
 
 /**
  * Fetches user progress with accurate randomized order calculation
- * @param userId - User ID
  * @returns Promise containing progress percentage
  */
-export const fetchUserProgress = async (userId: string): Promise<UserProgressResponse> => {
+export const fetchUserProgress = async (): Promise<UserProgressResponse> => {
   try {
     const response = await axios.get<UserProgressResponse>(
-      `${API_URL}/api/get-user-progress?user_id=${userId}`,
+      `${API_URL}/api/get-user-progress`,
       { 
-        withCredentials: true,
-        headers: {
-          'ngrok-skip-browser-warning': 'true'
-        }
+        withCredentials: true
       }
     );
     return response.data;

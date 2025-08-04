@@ -7,8 +7,9 @@ import ThankYouPage from './pages/ThankYouPage'
 import './styles/App.css'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 
+
 function AppRoutes() {
-	const { isLoggedIn, isLoading, login } = useAuth();
+	const { user, isLoading, login } = useAuth();
 
 	if (isLoading) {
 		return <div>Loading...</div>;
@@ -20,8 +21,8 @@ function AppRoutes() {
 				<Route
 					path="/"
 					element={
-						isLoggedIn ? (
-							<Navigate to="pre-activity" replace />
+						user ? (
+							<Navigate to="/pre-activity" replace />
 						) : (
 							<LandingPage onLoginSuccess={login} />
 						)
@@ -30,7 +31,7 @@ function AppRoutes() {
 				<Route
 					path="/pre-activity"
 					element={
-						isLoggedIn ? (
+						user ? (
 							<PreActivityPage />
 						) : (
 							<Navigate to="/" replace />
@@ -40,8 +41,8 @@ function AppRoutes() {
 				<Route
 					path="/survey"
 					element={
-						isLoggedIn ? (
-							<SurveyPage />
+						user ? (
+							<SurveyPage user={user} />
 						) : (
 							<Navigate to="/" replace />
 						)
@@ -50,7 +51,7 @@ function AppRoutes() {
 				<Route
 					path="/inter-round-survey"
 					element={
-						isLoggedIn ? (
+						user ? (
 							<InterRoundSurveyPage />
 						) : (
 							<Navigate to="/" replace />
@@ -60,7 +61,7 @@ function AppRoutes() {
 				<Route
 					path="/thank-you"
 					element={
-						isLoggedIn ? (
+						user ? (
 							<ThankYouPage />
 						) : (
 							<Navigate to="/" replace />

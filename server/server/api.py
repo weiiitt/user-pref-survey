@@ -1,5 +1,6 @@
 from flask import Blueprint, Response, current_app, jsonify, request, send_file, session
 from flask_cors import cross_origin
+from sqlalchemy.orm.attributes import flag_modified
 from server.user.models import User, UserTestProgress, InterRoundSurveyResponse
 from server.database import db
 from server.extensions import csrf_protect
@@ -107,8 +108,11 @@ def get_survey_config():
 @cross_origin(supports_credentials=True)
 @csrf_protect.exempt
 def get_user_progress() -> int:
-    user_id = request.args.get("user_id")
-    user = User.query.filter_by(id=user_id).first()
+    participant_id = session.get("user_id")
+    if not participant_id:
+        return jsonify({"error": "User not logged in"}), 401
+        
+    user = User.query.filter_by(participant_id=participant_id).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
     
@@ -287,16 +291,17 @@ def submit_choice():
         current_app.logger.warning(f"Response time too fast: {response_time:.2f}s -> {MIN_RESPONSE_TIME}s for user {participant_id}")
         response_time = MIN_RESPONSE_TIME
     
-    # Add the choice and response time to their progress
-    choices = progress.choices.copy() if progress.choices else []
-    response_times = progress.response_times.copy() if progress.response_times else []
-    
+    # Append the new choice and response time
+    choices = progress.choices.copy()
     choices.append(choice)
-    response_times.append(response_time)
-    
     progress.choices = choices
+    flag_modified(progress, "choices")
+
+    response_times = progress.response_times.copy()
+    response_times.append(response_time)
     progress.response_times = response_times
-    
+    flag_modified(progress, "response_times")
+
     # Check if this condition is complete using dynamic question count
     structure = get_survey_structure()
     current_condition_questions = structure[user.current_test_type][user.current_condition]

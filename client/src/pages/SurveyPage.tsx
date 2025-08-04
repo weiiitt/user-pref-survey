@@ -4,6 +4,7 @@ import { fetchQuestionImages, submitChoice, fetchSurveyConfig, checkPreActivityS
 import '../styles/SurveyPage.css';
 import Navbar from '../components/Navbar';
 import InstructionsPopup from '../components/InstructionsPopup';
+import type { User } from '../contexts/AuthContext';
 
 interface QuestionData {
 	image1: string;
@@ -13,7 +14,11 @@ interface QuestionData {
 	question_num: number;
 }
 
-function SurveyPage() {
+interface SurveyPageProps {
+  user: User;
+}
+
+function SurveyPage({ user }: SurveyPageProps) {
 	const navigate = useNavigate();
 	const [questionData, setQuestionData] = useState<QuestionData | null>(null);
 	const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
@@ -27,7 +32,7 @@ function SurveyPage() {
 	const [lastTestType, setLastTestType] = useState<string | null>(null);
 	const [hasShownInstructionsForSession, setHasShownInstructionsForSession] = useState(false);
 	const [totalQuestions, setTotalQuestions] = useState(60);
-	const [surveyStructure, setSurveyStructure] = useState<{tabletop: Record<number, number>; robot_nav: Record<number, number>}>({tabletop: {}, robot_nav: {}});
+	
 
 	const loadQuestion = async () => {
 		try {
@@ -39,8 +44,17 @@ function SurveyPage() {
 				return;
 			}
 			
+			// Set question data first
 			setQuestionData(data);
 			
+			// Then update progress based on the new data
+			if (totalQuestions > 0) {
+				fetchUserProgress().then(progressData => {
+					const currentProgress = Math.round(progressData.percent_answered * totalQuestions);
+					setProgress(currentProgress);
+				});
+			}
+
 			// Check if test type changed
 			const testTypeChanged = lastTestType !== null && lastTestType !== data.test_type;
 			
@@ -62,21 +76,6 @@ function SurveyPage() {
 				setPausedTime(0);
 			}
 			
-			// Get accurate progress from server (handles randomized condition orders)
-			const totalQuestions = Object.values(surveyStructure.tabletop).reduce((sum, count) => sum + count, 0) +
-								 Object.values(surveyStructure.robot_nav).reduce((sum, count) => sum + count, 0);
-			
-			if (totalQuestions > 0) {
-				fetchUserProgress(sessionStorage.getItem('user_id') || '').then(progressData => {
-					const currentProgress = Math.round(progressData.percent_answered * totalQuestions);
-					setProgress(currentProgress);
-				}).catch(() => {
-					// Fallback: just use current question number
-					setProgress(data.question_num + 1);
-				});
-			} else {
-				setProgress(data.question_num + 1);
-			}
 			setSelectedChoice(null);
 		} catch (error: any) {
 			console.error('Error loading question:', error);
@@ -154,29 +153,30 @@ function SurveyPage() {
 	useEffect(() => {
 		const initializePage = async () => {
 			try {
-				// Check if pre-activity survey is completed (login is already handled by AuthContext)
+				// 1. Check pre-activity survey status
 				const surveyStatus = await checkPreActivitySurvey();
 				if (!surveyStatus.completed) {
-					// Pre-activity survey not completed, redirect to pre-activity page
 					navigate('/pre-activity');
 					return;
 				}
+
+				// 2. Load survey configuration
+				const config = await fetchSurveyConfig();
+				setTotalQuestions(config.total_questions);
 				
-				// Set participant ID from auth context or session
-				// We'll get this from the auth context instead of the API call
+				setHasShownInstructionsForSession(false);
+
+				// 3. Load the first question
+				await loadQuestion();
+
 			} catch (error) {
-				console.error('Error checking survey status:', error);
-				// Don't redirect on error - let the auth context handle authentication redirects
+				console.error('Error initializing survey page:', error);
+				// Handle critical errors, e.g., redirect to an error page or show a message
 			}
 		};
 		
 		initializePage();
-	}, []); // Remove navigate from dependencies since we only want this to run once
-
-	useEffect(() => {
-		// Load first question immediately since we know user is authenticated
-		loadQuestion();
-	}, []);
+	}, [user]); // Re-initialize if user changes, though this shouldn't happen on this page
 
 	// Timer effect - updates every 100ms when timing is active
 	useEffect(() => {
@@ -190,24 +190,6 @@ function SurveyPage() {
 			if (interval) clearInterval(interval);
 		};
 	}, [questionStartTime, showInstructions, selectedChoice, isPaused]);
-
-	// Reset instructions flag when page loads (user returns to site)
-	// Load survey config on mount
-	useEffect(() => {
-		const loadConfig = async () => {
-			try {
-				const config = await fetchSurveyConfig();
-				setTotalQuestions(config.total_questions);
-				setSurveyStructure(config.structure);
-			} catch (error) {
-				console.error('Error loading survey config:', error);
-				// Keep default values on error
-			}
-		};
-		
-		setHasShownInstructionsForSession(false);
-		loadConfig();
-	}, []);
 
 
 

@@ -6,14 +6,14 @@ import Navbar from '../components/Navbar';
 
 function ThankYouPage() {
 	const navigate = useNavigate();
-	const { participantId, logout } = useAuth();
+	const { user, logout } = useAuth();
 
 	useEffect(() => {
 		// Check if user is logged in
-		if (!participantId) {
+		if (!user) {
 			navigate('/');
 		}
-	}, [participantId, navigate]);
+	}, [user, navigate]);
 
 	const handleLogout = async () => {
 		try {
