@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchQuestionImages, submitChoice, fetchSurveyConfig, checkPreActivitySurvey, fetchUserProgress } from '../utils/api';
+import { fetchQuestionImages, submitChoice, fetchSurveyConfig, checkPreActivitySurvey } from '../utils/api';
 import '../styles/SurveyPage.css';
 import Navbar from '../components/Navbar';
 import InstructionsPopup from '../components/InstructionsPopup';
-import type { User } from '../contexts/AuthContext';
 
 interface QuestionData {
 	image1: string;
@@ -14,11 +13,7 @@ interface QuestionData {
 	question_num: number;
 }
 
-interface SurveyPageProps {
-  user: User;
-}
-
-function SurveyPage({ user }: SurveyPageProps) {
+function SurveyPage() {
 	const navigate = useNavigate();
 	const [questionData, setQuestionData] = useState<QuestionData | null>(null);
 	const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
@@ -32,7 +27,7 @@ function SurveyPage({ user }: SurveyPageProps) {
 	const [lastTestType, setLastTestType] = useState<string | null>(null);
 	const [hasShownInstructionsForSession, setHasShownInstructionsForSession] = useState(false);
 	const [totalQuestions, setTotalQuestions] = useState(60);
-	
+	const [surveyStructure, setSurveyStructure] = useState<{tabletop: Record<number, number>; robot_nav: Record<number, number>}>({tabletop: {}, robot_nav: {}});
 
 	const loadQuestion = async () => {
 		try {
@@ -44,17 +39,8 @@ function SurveyPage({ user }: SurveyPageProps) {
 				return;
 			}
 			
-			// Set question data first
 			setQuestionData(data);
 			
-			// Then update progress based on the new data
-			if (totalQuestions > 0) {
-				fetchUserProgress().then(progressData => {
-					const currentProgress = Math.round(progressData.percent_answered * totalQuestions);
-					setProgress(currentProgress);
-				});
-			}
-
 			// Check if test type changed
 			const testTypeChanged = lastTestType !== null && lastTestType !== data.test_type;
 			
@@ -76,6 +62,17 @@ function SurveyPage({ user }: SurveyPageProps) {
 				setPausedTime(0);
 			}
 			
+			// Use progress from server (included in question data)
+			if (data.current_progress) {
+				setProgress(data.current_progress);
+			} else {
+				// Fallback for old data format
+				setProgress(data.question_num + 1);
+			}
+			
+			if (data.total_questions) {
+				setTotalQuestions(data.total_questions);
+			}
 			setSelectedChoice(null);
 		} catch (error: any) {
 			console.error('Error loading question:', error);
@@ -107,7 +104,7 @@ function SurveyPage({ user }: SurveyPageProps) {
 				// Navigate to inter-round survey
 				navigate('/inter-round-survey');
 			} else {
-				// Wait a moment to show selection, then load next question
+				// Wait a moment to show selection, then load next question (which will update progress)
 				setTimeout(() => {
 					loadQuestion();
 				}, 1000);
@@ -153,30 +150,29 @@ function SurveyPage({ user }: SurveyPageProps) {
 	useEffect(() => {
 		const initializePage = async () => {
 			try {
-				// 1. Check pre-activity survey status
+				// Check if pre-activity survey is completed (login is already handled by AuthContext)
 				const surveyStatus = await checkPreActivitySurvey();
 				if (!surveyStatus.completed) {
+					// Pre-activity survey not completed, redirect to pre-activity page
 					navigate('/pre-activity');
 					return;
 				}
-
-				// 2. Load survey configuration
-				const config = await fetchSurveyConfig();
-				setTotalQuestions(config.total_questions);
 				
-				setHasShownInstructionsForSession(false);
-
-				// 3. Load the first question
-				await loadQuestion();
-
+				// Set participant ID from auth context or session
+				// We'll get this from the auth context instead of the API call
 			} catch (error) {
-				console.error('Error initializing survey page:', error);
-				// Handle critical errors, e.g., redirect to an error page or show a message
+				console.error('Error checking survey status:', error);
+				// Don't redirect on error - let the auth context handle authentication redirects
 			}
 		};
 		
 		initializePage();
-	}, [user]); // Re-initialize if user changes, though this shouldn't happen on this page
+	}, []); // Remove navigate from dependencies since we only want this to run once
+
+	useEffect(() => {
+		// Load first question immediately since we know user is authenticated
+		loadQuestion();
+	}, []);
 
 	// Timer effect - updates every 100ms when timing is active
 	useEffect(() => {
@@ -190,6 +186,24 @@ function SurveyPage({ user }: SurveyPageProps) {
 			if (interval) clearInterval(interval);
 		};
 	}, [questionStartTime, showInstructions, selectedChoice, isPaused]);
+
+	// Reset instructions flag when page loads (user returns to site)
+	// Load survey config on mount
+	useEffect(() => {
+		const loadConfig = async () => {
+			try {
+				const config = await fetchSurveyConfig();
+				setTotalQuestions(config.total_questions);
+				setSurveyStructure(config.structure);
+			} catch (error) {
+				console.error('Error loading survey config:', error);
+				// Keep default values on error
+			}
+		};
+		
+		setHasShownInstructionsForSession(false);
+		loadConfig();
+	}, []);
 
 
 

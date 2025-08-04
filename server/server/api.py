@@ -1,6 +1,5 @@
 from flask import Blueprint, Response, current_app, jsonify, request, send_file, session
 from flask_cors import cross_origin
-from sqlalchemy.orm.attributes import flag_modified
 from server.user.models import User, UserTestProgress, InterRoundSurveyResponse
 from server.database import db
 from server.extensions import csrf_protect
@@ -104,18 +103,11 @@ def get_survey_config():
         "structure": structure
     })
 
-@api.route("/get-user-progress", methods=["GET"])
-@cross_origin(supports_credentials=True)
-@csrf_protect.exempt
-def get_user_progress() -> int:
-    participant_id = session.get("user_id")
-    if not participant_id:
-        return jsonify({"error": "User not logged in"}), 401
-        
-    user = User.query.filter_by(participant_id=participant_id).first()
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-    
+def calculate_user_progress_internal(user):
+    """
+    Calculate user progress based on randomized condition order.
+    Returns dict with current_progress and total_questions.
+    """
     test_type, condition, question_num = user.check_user_progress()
     structure = get_survey_structure()
     
@@ -128,26 +120,56 @@ def get_user_progress() -> int:
         # Sum questions from completed tabletop conditions based on randomized order
         completed_tabletop = 0
         if user.current_condition_index > 0:
-            # Sum questions from conditions completed so far in the randomized order
             for i in range(user.current_condition_index):
                 completed_condition = user.tabletop_condition_order[i]
                 completed_tabletop += structure["tabletop"].get(completed_condition, 0)
         
-        current_progress = completed_tabletop + question_num
-        return jsonify({"percent_answered": current_progress / total_questions})
-    elif test_type == "robot_nav":
-        # All tabletop questions (fully completed) + completed robot_nav conditions based on randomized order
+        current_progress = completed_tabletop + question_num + 1
+    else:  # robot_nav
+        # Sum ALL completed tabletop questions (user finished all tabletop conditions)
+        completed_tabletop = 0
+        for condition in user.tabletop_condition_order:
+            completed_tabletop += structure["tabletop"].get(condition, 0)
+        
+        # Sum questions from completed robot_nav conditions based on randomized order
         completed_robot_nav = 0
         if user.current_condition_index > 0:
-            # Sum questions from robot_nav conditions completed so far in the randomized order
             for i in range(user.current_condition_index):
                 completed_condition = user.robot_nav_condition_order[i]
                 completed_robot_nav += structure["robot_nav"].get(completed_condition, 0)
         
-        current_progress = tabletop_total + completed_robot_nav + question_num
-        return jsonify({"percent_answered": current_progress / total_questions})
-    else:
-        raise RuntimeError(f"Invalid test type: {test_type}")
+        current_progress = completed_tabletop + completed_robot_nav + question_num + 1
+    
+    return {
+        "current_progress": current_progress,
+        "total_questions": total_questions
+    }
+
+@api.route("/test", methods=["GET"])
+@cross_origin(supports_credentials=True)
+@csrf_protect.exempt
+def test_route():
+    return jsonify({"message": "API working!"})
+
+@api.route("/get-survey-config", methods=["GET"])
+@cross_origin(supports_credentials=True)
+@csrf_protect.exempt
+def get_survey_config():
+    """Returns dynamic survey configuration based on available assets"""
+    structure = get_survey_structure()
+    
+    tabletop_total = sum(structure["tabletop"].values())
+    robot_nav_total = sum(structure["robot_nav"].values())
+    total_questions = tabletop_total + robot_nav_total
+    
+    return jsonify({
+        "total_questions": total_questions,
+        "tabletop_questions": tabletop_total,
+        "robot_nav_questions": robot_nav_total,
+        "structure": structure
+    })
+
+
 
 @api.route("/get-question-images", methods=["GET"])
 @cross_origin(supports_credentials=True)
@@ -244,12 +266,17 @@ def get_question_images():
     with open(image2_path, "rb") as img2_file:
         image2_data = base64.b64encode(img2_file.read()).decode('utf-8')
     
+    # Add progress calculation to question data
+    progress_data = calculate_user_progress_internal(user)
+    
     return jsonify({
         "image1": f"data:image/png;base64,{image1_data}",
         "image2": f"data:image/png;base64,{image2_data}",
         "test_type": test_type,
         "condition": condition,
-        "question_num": question_num
+        "question_num": question_num,
+        "current_progress": progress_data["current_progress"],
+        "total_questions": progress_data["total_questions"]
     })
 
 @api.route("/submit-choice", methods=["POST"])
@@ -291,17 +318,16 @@ def submit_choice():
         current_app.logger.warning(f"Response time too fast: {response_time:.2f}s -> {MIN_RESPONSE_TIME}s for user {participant_id}")
         response_time = MIN_RESPONSE_TIME
     
-    # Append the new choice and response time
-    choices = progress.choices.copy()
+    # Add the choice and response time to their progress
+    choices = progress.choices.copy() if progress.choices else []
+    response_times = progress.response_times.copy() if progress.response_times else []
+    
     choices.append(choice)
-    progress.choices = choices
-    flag_modified(progress, "choices")
-
-    response_times = progress.response_times.copy()
     response_times.append(response_time)
+    
+    progress.choices = choices
     progress.response_times = response_times
-    flag_modified(progress, "response_times")
-
+    
     # Check if this condition is complete using dynamic question count
     structure = get_survey_structure()
     current_condition_questions = structure[user.current_test_type][user.current_condition]
@@ -351,15 +377,10 @@ def submit_choice():
     
     db.session.commit()
     
-    # Return current status
-    test_type, condition, question_num = user.check_user_progress()
     return jsonify({
         "message": "Choice recorded successfully",
         "completed": False,
-        "show_inter_round_survey": show_inter_round_survey,
-        "current_test_type": test_type,
-        "current_condition": condition,
-        "current_question": question_num
+        "show_inter_round_survey": show_inter_round_survey
     })
 
 @api.route("/submit-inter-round-survey", methods=["POST"])

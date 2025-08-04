@@ -3,19 +3,6 @@ import type { PreviousAnswer, RouteResponse } from '../types/APIResponses';
 
 export const API_URL = 'https://minnow-tolerant-usefully.ngrok-free.app';
 
-// Add a request interceptor
-axios.interceptors.request.use(
-  config => {
-    // Add the ngrok-skip-browser-warning header
-    config.headers['ngrok-skip-browser-warning'] = 'true';
-    return config;
-  },
-  error => {
-    // Do something with request error
-    return Promise.reject(error);
-  }
-);
-
 interface RandomRoutesResponse {
   routes: RouteResponse[];
 }
@@ -50,6 +37,8 @@ interface QuestionImagesResponse {
   test_type: string;
   condition: number;
   question_num: number;
+  current_progress?: number;
+  total_questions?: number;
   error?: string;
   show_inter_round_survey?: boolean;
   pending_survey_test_type?: string;
@@ -60,9 +49,6 @@ interface SubmitChoiceResponse {
   message: string;
   completed: boolean;
   show_inter_round_survey?: boolean;
-  current_test_type?: string;
-  current_condition?: number;
-  current_question?: number;
 }
 
 /**
@@ -342,25 +328,3 @@ export const generateParticipantId = (): string => {
   return Math.floor(Math.random() * 10000).toString().padStart(4, '0');
 };
 
-interface UserProgressResponse {
-  percent_answered: number;
-}
-
-/**
- * Fetches user progress with accurate randomized order calculation
- * @returns Promise containing progress percentage
- */
-export const fetchUserProgress = async (): Promise<UserProgressResponse> => {
-  try {
-    const response = await axios.get<UserProgressResponse>(
-      `${API_URL}/api/get-user-progress`,
-      { 
-        withCredentials: true
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error('[api.ts] Error fetching user progress:', error);
-    throw error;
-  }
-};

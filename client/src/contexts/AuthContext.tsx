@@ -1,13 +1,9 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { checkLoginStatus, logoutUser } from '../utils/api';
 
-export interface User {
-  id: string;
-  // Add other user properties here if needed in the future
-}
-
 interface AuthContextType {
-  user: User | null;
+  isLoggedIn: boolean;
+  participantId: string;
   isLoading: boolean;
   login: (id: string) => void;
   logout: () => Promise<void>;
@@ -28,21 +24,22 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [participantId, setParticipantId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const { isLoggedIn: loggedIn, participantId } = await checkLoginStatus();
-        if (loggedIn && participantId) {
-          setUser({ id: participantId });
-        } else {
-          setUser(null);
+        const { isLoggedIn: loggedIn, participantId: id } = await checkLoginStatus();
+        setIsLoggedIn(loggedIn);
+        if (id) {
+          setParticipantId(id);
         }
       } catch (error) {
         console.error('Error checking login status:', error);
-        setUser(null);
+        setIsLoggedIn(false);
+        setParticipantId('');
       } finally {
         setIsLoading(false);
       }
@@ -51,24 +48,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = (id: string) => {
-    setUser({ id });
-    // Also set in session storage for persistence across reloads
-    sessionStorage.setItem('user_id', id);
+    setIsLoggedIn(true);
+    setParticipantId(id);
   };
 
   const logout = async () => {
     try {
       await logoutUser();
+      setIsLoggedIn(false);
+      setParticipantId('');
     } catch (error) {
       console.error('Error logging out:', error);
-    } finally {
-      setUser(null);
-      sessionStorage.removeItem('user_id');
+      // Still update local state even if API call fails
+      setIsLoggedIn(false);
+      setParticipantId('');
     }
   };
 
   const value = {
-    user,
+    isLoggedIn,
+    participantId,
     isLoading,
     login,
     logout,
