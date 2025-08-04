@@ -500,3 +500,11 @@ def submit_pre_activity_survey():
         "success": True
     })
 
+@api.route("/test-route", methods=["GET"])
+@cross_origin(supports_credentials=True)
+@csrf_protect.exempt
+def test_route():
+    return jsonify({
+        "message": "Test route working",
+        "success": True
+    })
