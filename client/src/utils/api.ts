@@ -37,7 +37,6 @@ interface QuestionImagesResponse {
   test_type: string;
   condition: number;
   question_num: number;
-  question_start_time: number;
   error?: string;
   show_inter_round_survey?: boolean;
   pending_survey_test_type?: string;
@@ -218,14 +217,14 @@ export const fetchQuestionImages = async (): Promise<QuestionImagesResponse> => 
 /**
  * Submits user's choice for current question
  * @param choice - 0 for first image, 1 for second image
- * @param question_start_time - timestamp when question was shown
+ * @param response_time - response time in seconds
  * @returns Promise containing submission result
  */
-export const submitChoice = async (choice: number, question_start_time: number): Promise<SubmitChoiceResponse> => {
+export const submitChoice = async (choice: number, response_time: number): Promise<SubmitChoiceResponse> => {
   try {
     const response = await axios.post<SubmitChoiceResponse>(
       `${API_URL}/api/submit-choice`,
-      { choice, question_start_time },
+      { choice, response_time },
       { withCredentials: true }
     );
     return response.data;
@@ -236,19 +235,87 @@ export const submitChoice = async (choice: number, question_start_time: number):
 };
 
 /**
- * Submits inter-round survey completion
+ * Submits inter-round survey with responses
+ * @param responses - Survey response data
  * @returns Promise containing submission result
  */
-export const submitInterRoundSurvey = async (): Promise<{ message: string; success: boolean }> => {
+export const submitInterRoundSurvey = async (responses: {
+  mental_demand: number;
+  success_level: number;
+  frustration_level: number;
+  trajectory_choice_ease: number;
+  difference_clarity: number;
+  preference_learning: number;
+  decision_factors: string;
+}): Promise<{ message: string; success: boolean }> => {
   try {
     const response = await axios.post<{ message: string; success: boolean }>(
       `${API_URL}/api/submit-inter-round-survey`,
-      {},
+      responses,
       { withCredentials: true }
     );
     return response.data;
   } catch (error) {
     console.error('[api.ts] submitInterRoundSurvey: Error submitting inter-round survey:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetches survey configuration including dynamic question counts
+ * @returns Promise containing survey config
+ */
+export const fetchSurveyConfig = async (): Promise<{
+  total_questions: number;
+  tabletop_questions: number;
+  robot_nav_questions: number;
+  structure: { tabletop: Record<number, number>; robot_nav: Record<number, number> };
+}> => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/api/get-survey-config`,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[api.ts] fetchSurveyConfig: Error fetching survey config:', error);
+    throw error;
+  }
+};
+
+/**
+ * Checks if user has completed the pre-activity survey
+ * @returns Promise containing completion status and user data
+ */
+export const checkPreActivitySurvey = async (): Promise<{ completed: boolean; age?: number; sex?: string }> => {
+  try {
+    const response = await axios.get<{ completed: boolean; age?: number; sex?: string }>(
+      `${API_URL}/api/check-pre-activity-survey`,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[api.ts] checkPreActivitySurvey: Error checking pre-activity survey status:', error);
+    throw error;
+  }
+};
+
+/**
+ * Submits pre-activity survey data (age and sex)
+ * @param age - User's age (1-120)
+ * @param sex - User's sex
+ * @returns Promise containing submission result
+ */
+export const submitPreActivitySurvey = async (age: number, sex: string): Promise<{ message: string; success: boolean }> => {
+  try {
+    const response = await axios.post<{ message: string; success: boolean }>(
+      `${API_URL}/api/submit-pre-activity-survey`,
+      { age, sex },
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[api.ts] submitPreActivitySurvey: Error submitting pre-activity survey:', error);
     throw error;
   }
 };

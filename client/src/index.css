@@ -3,52 +3,18 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  /* color: rgba(255, 255, 255, 0.87); */
-
-  --backgound-color: #181a1b;
-  --background-color: var(--backgound-color);
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --light-base-color: hsl(195, 13%, 94%);
-  --dark-base-color: hsl(195, 3%, 18%);
-  --base-color: var(--light-base-color);
-
-  --light-overlay-color: hsl(215, 4%, 90%, 0.9);
-  --dark-overlay-color: hsla(215, 3%, 24%, 0.9);
-  --overlay-color: var(--light-overlay-color);
-
-  --light-container-color: hsl(215, 53%, 90%);
-  --dark-container-color: hsl(215, 5%, 15%);
-  --container-color: var(--light-container-color);
-
-  --light-button-color: hsl(215, 100%, 75%);
-  --dark-button-color: hsl(215, 74%, 53%);
-  --button-color: var(--light-button-color);
-
-  --light-button-highlight-color: hsl(215, 100%, 85%);
-  --dark-button-highlight-color: hsl(215, 74%, 63%);
-  --button-highlight-color: var(--light-button-highlight-color);
-
-  --dark-text-color: hsl(195, 3%, 92%);
-  --light-text-color: hsl(195, 3%, 15%);
-
-  --text-color: var(--light-text-color);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --base-color: var(--dark-base-color);
-    --overlay-color: var(--dark-overlay-color);
-    --container-color: var(--dark-container-color);
-    --button-color: var(--dark-button-color);
-    --button-highlight-color: var(--dark-button-highlight-color);
-    --text-color: var(--dark-text-color);
-  }
+  --background-color: hsl(195, 3%, 8%);
+  --base-color: hsl(195, 3%, 10%);
+  --overlay-color: hsla(215, 3%, 0%, 0.5);
+  --container-color: hsla(215, 5%, 18%, 0.8);
+  --button-color: hsl(215, 74%, 53%);
+  --button-highlight-color: hsl(215, 74%, 63%);
+  --text-color: hsl(195, 3%, 92%);
 }
 
 
@@ -56,6 +22,7 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  background-color: var(--background-color);
 }
 
 a {
@@ -99,6 +66,21 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.container {
+  padding: 20px;
+  border: 1px solid var(--container-color);
+  border-radius: 10px;
+  background-color: var(--base-color);
+}
+
+.survey-container {
+  margin-top: 20px;
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 #root {

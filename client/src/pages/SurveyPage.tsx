@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { fetchQuestionImages, submitChoice, checkLoginStatus, submitInterRoundSurvey } from '../utils/api';
+import { useNavigate } from 'react-router-dom';
+import { fetchQuestionImages, submitChoice, checkLoginStatus, fetchSurveyConfig, checkPreActivitySurvey } from '../utils/api';
 import '../styles/SurveyPage.css';
 import Navbar from '../components/Navbar';
+import InstructionsPopup from '../components/InstructionsPopup';
 
 interface QuestionData {
 	image1: string;
@@ -9,16 +11,24 @@ interface QuestionData {
 	test_type: string;
 	condition: number;
 	question_num: number;
-	question_start_time: number;
 }
 
 function SurveyPage() {
+	const navigate = useNavigate();
 	const [questionData, setQuestionData] = useState<QuestionData | null>(null);
 	const [participantId, setParticipantId] = useState<string>('');
 	const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 	const [progress, setProgress] = useState(0);
-	const [showInterRoundSurvey, setShowInterRoundSurvey] = useState(false);
-	const totalQuestions = 60; // 2 test types × 3 conditions × 10 questions
+
+	const [showInstructions, setShowInstructions] = useState(false);
+	const [questionStartTime, setQuestionStartTime] = useState<number | null>(null);
+	const [currentTime, setCurrentTime] = useState<number>(0);
+	const [isPaused, setIsPaused] = useState(false);
+	const [pausedTime, setPausedTime] = useState<number>(0);
+	const [lastTestType, setLastTestType] = useState<string | null>(null);
+	const [hasShownInstructionsForSession, setHasShownInstructionsForSession] = useState(false);
+	const [totalQuestions, setTotalQuestions] = useState(60);
+	const [surveyStructure, setSurveyStructure] = useState<{tabletop: Record<number, number>; robot_nav: Record<number, number>}>({tabletop: {}, robot_nav: {}});
 
 	const loadQuestion = async () => {
 		try {
@@ -26,22 +36,58 @@ function SurveyPage() {
 			
 			// Check if there's a pending inter-round survey
 			if (data.show_inter_round_survey) {
-				setShowInterRoundSurvey(true);
+				navigate('/inter-round-survey');
 				return;
 			}
 			
-			// Override the backend timestamp with current time to handle page refreshes/navigation
-			const freshData = {
-				...data,
-				question_start_time: Date.now() / 1000  // Convert to seconds to match backend
-			};
-			setQuestionData(freshData);
+			setQuestionData(data);
 			
-			// Calculate progress: (condition * 10 + question_num) for current test + completed test questions
-			const currentProgress = data.test_type === "tabletop" 
-				? data.condition * 10 + data.question_num
-				: 30 + data.condition * 10 + data.question_num;
-			setProgress(currentProgress);
+			// Check if test type changed
+			const testTypeChanged = lastTestType !== null && lastTestType !== data.test_type;
+			
+			setLastTestType(data.test_type);
+			
+			// Show instructions if test type changed or first time in session
+			const willShowInstructions = !hasShownInstructionsForSession || testTypeChanged;
+			
+			if (willShowInstructions) {
+				setShowInstructions(true);
+				setHasShownInstructionsForSession(true);
+				// Reset timing state - will start when instructions close
+				setQuestionStartTime(null);
+			} else {
+				// Start timing immediately for questions without instructions
+				setQuestionStartTime(Date.now());
+				setCurrentTime(0);
+				setIsPaused(false);
+				setPausedTime(0);
+			}
+			
+			// Calculate progress dynamically - only if structure is loaded
+			if (Object.keys(surveyStructure.tabletop).length > 0 || Object.keys(surveyStructure.robot_nav).length > 0) {
+				let currentProgress = 0;
+				if (data.test_type === "tabletop") {
+					// Sum questions from completed tabletop conditions + current progress
+					const completedTabletop = Object.keys(surveyStructure.tabletop)
+						.filter(c => parseInt(c) < data.condition)
+						.reduce((sum, c) => sum + surveyStructure.tabletop[parseInt(c)], 0);
+					currentProgress = completedTabletop + data.question_num;
+				} else {
+					// All tabletop + completed robot_nav + current progress
+					const tabletopTotal = Object.values(surveyStructure.tabletop).reduce((sum, count) => sum + count, 0);
+					const completedRobotNav = Object.keys(surveyStructure.robot_nav)
+						.filter(c => parseInt(c) < data.condition)
+						.reduce((sum, c) => sum + surveyStructure.robot_nav[parseInt(c)], 0);
+					currentProgress = tabletopTotal + completedRobotNav + data.question_num;
+				}
+				setProgress(currentProgress);
+			} else {
+				// Fallback calculation while structure is loading
+				const fallbackProgress = data.test_type === "tabletop" 
+					? data.condition * 10 + data.question_num
+					: 30 + data.condition * 10 + data.question_num;
+				setProgress(fallbackProgress);
+			}
 			setSelectedChoice(null);
 		} catch (error: any) {
 			console.error('Error loading question:', error);
@@ -50,23 +96,28 @@ function SurveyPage() {
 				window.location.href = '/';
 			} else if (error.response?.status === 202) {
 				// Inter-round survey pending
-				setShowInterRoundSurvey(true);
+				navigate('/inter-round-survey');
 			}
 		}
 	};
 
 	const handleChoiceSelect = async (choice: number) => {
-		if (selectedChoice !== null || !questionData) return;
+		if (selectedChoice !== null || !questionData || questionStartTime === null || isPaused) return;
 		
 		setSelectedChoice(choice);
+		// Calculate response time
+		const responseTime = (Date.now() - questionStartTime) / 1000; // Convert to seconds
+		
 		try {
-			const result = await submitChoice(choice, questionData.question_start_time);
+			const result = await submitChoice(choice, responseTime);
 			
 			if (result.completed) {
-				alert('Survey completed! Thank you for participating.');
+				// Navigate to thank you page instead of showing alert
+				navigate('/thank-you');
+				return;
 			} else if (result.show_inter_round_survey) {
-				// Show inter-round survey
-				setShowInterRoundSurvey(true);
+				// Navigate to inter-round survey
+				navigate('/inter-round-survey');
 			} else {
 				// Wait a moment to show selection, then load next question
 				setTimeout(() => {
@@ -83,17 +134,31 @@ function SurveyPage() {
 		}
 	};
 
-	const handleInterRoundSurveyComplete = async () => {
-		try {
-			await submitInterRoundSurvey();
-			setShowInterRoundSurvey(false);
-			// Load next question after survey completion
-			loadQuestion();
-		} catch (error: any) {
-			console.error('Error submitting inter-round survey:', error);
-			if (error.response?.status === 404 || error.response?.status === 401) {
-				window.location.href = '/';
-			}
+
+
+	const handleShowInstructions = () => {
+		setShowInstructions(true);
+	};
+
+	const handleCloseInstructions = () => {
+		setShowInstructions(false);
+		// Start timing when instructions are closed
+		setQuestionStartTime(Date.now());
+		setCurrentTime(0);
+		setIsPaused(false);
+		setPausedTime(0);
+	};
+
+	const handlePause = () => {
+		if (isPaused) {
+			// Resume: adjust start time to account for paused duration
+			const pauseDuration = Date.now() - pausedTime;
+			setQuestionStartTime(prev => prev ? prev + pauseDuration : Date.now());
+			setIsPaused(false);
+		} else {
+			// Pause: record when we paused
+			setPausedTime(Date.now());
+			setIsPaused(true);
 		}
 	};
 
@@ -102,19 +167,27 @@ function SurveyPage() {
 			try {
 				const loginStatus = await checkLoginStatus();
 				if (loginStatus.isLoggedIn && loginStatus.participantId) {
+					// Check if pre-activity survey is completed
+					const surveyStatus = await checkPreActivitySurvey();
+					if (!surveyStatus.completed) {
+						// Pre-activity survey not completed, redirect to pre-activity page
+						navigate('/pre-activity');
+						return;
+					}
+					
 					setParticipantId(loginStatus.participantId);
 				} else {
 					// Redirect to landing page if not logged in
 					window.location.href = '/';
 				}
 			} catch (error) {
-				console.error('Error checking login status:', error);
+				console.error('Error checking status:', error);
 				window.location.href = '/';
 			}
 		};
 		
 		initializePage();
-	}, []);
+	}, [navigate]);
 
 	useEffect(() => {
 		if (participantId) {
@@ -122,41 +195,39 @@ function SurveyPage() {
 		}
 	}, [participantId]);
 
+	// Timer effect - updates every 100ms when timing is active
+	useEffect(() => {
+		let interval: NodeJS.Timeout;
+		if (questionStartTime !== null && !showInstructions && selectedChoice === null && !isPaused) {
+			interval = setInterval(() => {
+				setCurrentTime((Date.now() - questionStartTime) / 1000);
+			}, 100);
+		}
+		return () => {
+			if (interval) clearInterval(interval);
+		};
+	}, [questionStartTime, showInstructions, selectedChoice, isPaused]);
 
-	if (showInterRoundSurvey) {
-		return (
-			<div className="landing-page">
-				<Navbar />
-				<div className='landing-page-content'>
-					<div className='landing-page-content-text'>
-						<h1>Inter-Round Survey</h1>
-						<p>
-							<b>After completing the form below, click the button at the bottom to continue to the next set of questions.</b>
-						</p>
+	// Reset instructions flag when page loads (user returns to site)
+	// Load survey config on mount
+	useEffect(() => {
+		const loadConfig = async () => {
+			try {
+				const config = await fetchSurveyConfig();
+				setTotalQuestions(config.total_questions);
+				setSurveyStructure(config.structure);
+			} catch (error) {
+				console.error('Error loading survey config:', error);
+				// Keep default values on error
+			}
+		};
+		
+		setHasShownInstructionsForSession(false);
+		loadConfig();
+	}, []);
 
-						<div className="google-form-container">
-							<iframe
-								src="https://docs.google.com/forms/d/e/1FAIpQLSe-psvsxo3dLWyIt_waPOcTnRh7VAXOopoy8oWjSHGMtvUJbg/viewform?embedded=true"
-								width={640}
-								height={1816}
-								style={{ border: 0, margin: 0 }}
-							>
-								Loading…
-							</iframe>
-						</div>
 
-						<p>
-							After completing the form above, click the button below to continue to the next set of questions.
-						</p>
-					</div>
 
-					<button onClick={handleInterRoundSurveyComplete} className="start-button">
-						Continue to Next Set
-					</button>
-				</div>
-			</div>
-		);
-	}
 
 	if (!questionData) {
 		return <div>Error loading question data</div>;
@@ -164,7 +235,7 @@ function SurveyPage() {
 
 	return (
 		<div className="survey-container">
-			<Navbar  />
+			<Navbar onShowInstructions={handleShowInstructions} timer={questionStartTime !== null && !showInstructions ? currentTime : null} onPause={handlePause} isPaused={isPaused} />
 			{/* Progress Bar */}
 			<div className="progress-section">
 				<div className="progress-info">
@@ -184,7 +255,7 @@ function SurveyPage() {
 				<h2>Question {questionData.question_num + 1}</h2>
 				<p>Click on an image to select your preferred trajectory</p>
 				
-				<div className={`images-section ${selectedChoice !== null ? 'processing' : ''}`}>
+				<div className={`images-section ${selectedChoice !== null ? 'processing' : ''} ${isPaused ? 'paused' : ''}`}>
 					<div 
 						className={`image-container ${selectedChoice === 0 ? 'selected' : ''}`}
 						onClick={() => handleChoiceSelect(0)}
@@ -201,6 +272,11 @@ function SurveyPage() {
 					</div>
 				</div>
 			</div>
+			<InstructionsPopup 
+				isVisible={showInstructions}
+				onClose={handleCloseInstructions}
+				testType={questionData.test_type}
+			/>
 		</div>
 	);
 

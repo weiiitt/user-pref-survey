@@ -12,6 +12,7 @@
     flex-direction: column;
     width: 100%;
     height: 100%;
+    gap: 20px;
 }
 
 .landing-page-content-text {
@@ -44,6 +45,11 @@
     border: none;
     transition: background-color 0.15s ease-in-out;
     font-size: 1.5em;
+    color: var(--text-color);
+}
+
+.start-button:disabled {
+    opacity: 0.5;
 }
 
 .start-button:hover {
@@ -148,7 +154,7 @@
     padding: 20px;
     border: 2px solid var(--container-color);
     border-radius: 10px;
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--base-color);
     text-align: center;
 }
 
@@ -226,4 +232,55 @@
 .cancel-button:hover {
     background-color: rgba(255, 255, 255, 0.1);
     border-color: var(--text-color);
+}
+
+/* Pre-Activity Survey Form Styles */
+.survey-form-field {
+    margin-bottom: 20px;
+}
+
+.survey-form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.survey-form-input {
+    padding: 12px;
+    font-size: 1.1rem;
+    border: 2px solid var(--container-color);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    width: 200px;
+    font-family: inherit;
+}
+
+.survey-form-input:focus {
+    outline: none;
+    border-color: var(--button-color);
+}
+
+.survey-form-select {
+    padding: 12px;
+    font-size: 1.1rem;
+    border: 2px solid var(--container-color);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    width: 200px;
+    font-family: inherit;
+    text-align: left;
+}
+
+.survey-form-select:focus {
+    outline: none;
+    border-color: var(--button-color);
+}
+
+.survey-form-select option {
+    background-color: var(--base-color);
+    color: var(--text-color);
 }

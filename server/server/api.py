@@ -1,19 +1,107 @@
-from flask import Blueprint, Response, current_app, jsonify, request, send_file
+from flask import Blueprint, Response, current_app, jsonify, request, send_file, session
 from flask_cors import cross_origin
-from server.user.models import User, UserTestProgress
+from server.user.models import User, UserTestProgress, InterRoundSurveyResponse
 from server.database import db
 from server.extensions import csrf_protect
 import os
 import base64
-import time
 
 api = Blueprint("api", __name__, url_prefix="/api")
+
+def get_survey_structure():
+    """
+    Dynamically discover available conditions and questions by scanning the assets folder.
+    Returns a dict with test_type as key and condition data as value.
+    Format: {"tabletop": {0: 8, 1: 10, 2: 7}, "robot_nav": {0: 9, 1: 12}}
+    Where numbers are question counts for each condition.
+    """
+    assets_path = os.path.join("/app", "assets", "user_study")
+    structure = {"tabletop": {}, "robot_nav": {}}
+    
+    try:
+        if os.path.exists(assets_path):
+            for folder_name in os.listdir(assets_path):
+                folder_path = os.path.join(assets_path, folder_name)
+                if os.path.isdir(folder_path):
+                    if folder_name.startswith("TableTop-v"):
+                        condition_num = int(folder_name.split("-v")[1])
+                        question_count = count_questions_in_folder(folder_path, folder_name)
+                        structure["tabletop"][condition_num] = question_count
+                    elif folder_name.startswith("GrassStreetNav-v"):
+                        condition_num = int(folder_name.split("-v")[1])
+                        question_count = count_questions_in_folder(folder_path, folder_name)
+                        structure["robot_nav"][condition_num] = question_count
+    except Exception as e:
+        current_app.logger.error(f"Error scanning survey structure: {e}")
+        # Fall back to defaults if scanning fails
+        structure = {"tabletop": {0: 10, 1: 10, 2: 10}, "robot_nav": {0: 10, 1: 10, 2: 10}}
+    
+    return structure
+
+def count_questions_in_folder(folder_path, folder_name):
+    """
+    Count the number of unique questions in a condition folder.
+    Each question has multiple files for different choice combinations.
+    """
+    try:
+        files = os.listdir(folder_path)
+        # Look for files matching the pattern and extract unique question numbers
+        import re
+        if folder_name.startswith("TableTop-v"):
+            pattern = rf"^{re.escape(folder_name)}_query_(\d+)_.*_1\.png$"
+        elif folder_name.startswith("GrassStreetNav-v"):
+            pattern = rf"^{re.escape(folder_name)}_query_(\d+)_.*_1\.png$"
+        else:
+            return 10  # Default fallback for unknown folder types
+            
+        question_numbers = set()
+        for filename in files:
+            match = re.match(pattern, filename)
+            if match:
+                question_num = int(match.group(1))
+                question_numbers.add(question_num)
+        
+        count = len(question_numbers)
+        current_app.logger.info(f"Found {count} unique questions in {folder_name} (question numbers: {sorted(question_numbers)})")
+        return count if count > 0 else 10  # Fallback to 10 if no matches found
+    except Exception as e:
+        current_app.logger.error(f"Error counting questions in {folder_name}: {e}")
+        return 10  # Default fallback
+
+def get_available_conditions():
+    """
+    Get max condition numbers for backward compatibility.
+    """
+    structure = get_survey_structure()
+    conditions = {
+        "tabletop": max(structure["tabletop"].keys()) if structure["tabletop"] else 0,
+        "robot_nav": max(structure["robot_nav"].keys()) if structure["robot_nav"] else 0
+    }
+    return conditions
 
 @api.route("/test", methods=["GET"])
 @cross_origin(supports_credentials=True)
 @csrf_protect.exempt
 def test_route():
     return jsonify({"message": "API working!"})
+
+@api.route("/get-survey-config", methods=["GET"])
+@cross_origin(supports_credentials=True)
+@csrf_protect.exempt
+def get_survey_config():
+    """Returns dynamic survey configuration based on available assets"""
+    structure = get_survey_structure()
+    
+    tabletop_total = sum(structure["tabletop"].values())
+    robot_nav_total = sum(structure["robot_nav"].values())
+    total_questions = tabletop_total + robot_nav_total
+    
+    return jsonify({
+        "total_questions": total_questions,
+        "tabletop_questions": tabletop_total,
+        "robot_nav_questions": robot_nav_total,
+        "structure": structure
+    })
 
 @api.route("/get-user-progress", methods=["GET"])
 @cross_origin(supports_credentials=True)
@@ -25,11 +113,23 @@ def get_user_progress() -> int:
         return jsonify({"error": "User not found"}), 404
     
     test_type, condition, question_num = user.check_user_progress()
+    structure = get_survey_structure()
+    
+    # Calculate total questions dynamically
+    tabletop_total = sum(structure["tabletop"].values())
+    robot_nav_total = sum(structure["robot_nav"].values())
+    total_questions = tabletop_total + robot_nav_total
     
     if test_type == "tabletop":
-        return jsonify({"percent_answered": (condition * 10 + question_num) / 60})
+        # Sum questions from completed tabletop conditions + current progress
+        completed_tabletop = sum(structure["tabletop"][c] for c in structure["tabletop"] if c < condition)
+        current_progress = completed_tabletop + question_num
+        return jsonify({"percent_answered": current_progress / total_questions})
     elif test_type == "robot_nav":
-        return jsonify({"percent_answered": (30 + condition * 10 + question_num) / 60})
+        # All tabletop questions + completed robot_nav conditions + current progress
+        completed_robot_nav = sum(structure["robot_nav"][c] for c in structure["robot_nav"] if c < condition)
+        current_progress = tabletop_total + completed_robot_nav + question_num
+        return jsonify({"percent_answered": current_progress / total_questions})
     else:
         raise RuntimeError(f"Invalid test type: {test_type}")
 
@@ -38,7 +138,6 @@ def get_user_progress() -> int:
 @csrf_protect.exempt
 def get_question_images():
     # Get participant ID from session
-    from flask import session
     participant_id = session.get('user_id')
     current_app.logger.info(f"Fetching images for participant: {participant_id}")
     
@@ -103,8 +202,8 @@ def get_question_images():
         folder_name = f"TableTop-v{condition}"
         base_filename = f"TableTop-v{condition}_query_{question_num}_{choices_str}_"
     else:  # robot_nav
-        folder_name = f"RobotNav-v{condition}"  # Assuming similar naming pattern
-        base_filename = f"RobotNav-v{condition}_query_{question_num}_{choices_str}_"
+        folder_name = f"GrassStreetNav-v{condition}"  # Assuming similar naming pattern
+        base_filename = f"GrassStreetNav-v{condition}_query_{question_num}_{choices_str}_"
     
     # Construct full paths (assets are at /app/assets in Docker container)
     assets_path = os.path.join("/app", "assets", "user_study", folder_name)
@@ -134,19 +233,17 @@ def get_question_images():
         "image2": f"data:image/png;base64,{image2_data}",
         "test_type": test_type,
         "condition": condition,
-        "question_num": question_num,
-        "question_start_time": time.time()
+        "question_num": question_num
     })
 
 @api.route("/submit-choice", methods=["POST"])
 @cross_origin(supports_credentials=True)
 @csrf_protect.exempt
 def submit_choice():
-    from flask import session
     data = request.get_json()
     participant_id = session.get('user_id')
     choice = data.get("choice")  # 0 for option 1, 1 for option 2
-    question_start_time = data.get("question_start_time")  # timestamp from when question was shown
+    response_time = data.get("response_time")  # response time in seconds from frontend
     
     if not participant_id:
         return jsonify({"error": "Not logged in"}), 401
@@ -154,8 +251,8 @@ def submit_choice():
     if choice not in [0, 1]:
         return jsonify({"error": "Choice must be 0 or 1"}), 400
     
-    if question_start_time is None:
-        return jsonify({"error": "question_start_time is required"}), 400
+    if response_time is None:
+        return jsonify({"error": "response_time is required"}), 400
     
     user = User.query.filter_by(participant_id=participant_id).first()
     if not user:
@@ -170,9 +267,6 @@ def submit_choice():
     
     if not progress:
         return jsonify({"error": "Progress not found"}), 404
-    
-    # Calculate response time with validation
-    response_time = time.time() - question_start_time
     
     # Validate minimum response time to prevent accidental clicks
     MIN_RESPONSE_TIME = 0.1  # 100ms minimum
@@ -191,26 +285,36 @@ def submit_choice():
     progress.choices = choices
     progress.response_times = response_times
     
-    # Check if this condition is complete (assuming 10 questions per condition)
-    questions_per_condition = 10
+    # Check if this condition is complete using dynamic question count
+    structure = get_survey_structure()
+    current_condition_questions = structure[user.current_test_type][user.current_condition]
     show_inter_round_survey = False
+    available_conditions = get_available_conditions()
     
-    if len(choices) >= questions_per_condition:
+    if len(choices) >= current_condition_questions:
         progress.completed = True
         
         # Check if we need to show inter-round survey (not for the final completion)
-        is_final_completion = (user.current_condition == 2 and user.current_test_type == "robot_nav")
+        max_tabletop_condition = available_conditions["tabletop"]
+        max_robot_nav_condition = available_conditions["robot_nav"]
+        is_final_completion = (user.current_condition == max_robot_nav_condition and user.current_test_type == "robot_nav")
         
         if not is_final_completion:
             show_inter_round_survey = True
         
         # Move to next condition or test type
-        if user.current_condition < 2:  # Move to next condition
+        if user.current_test_type == "tabletop" and user.current_condition < max_tabletop_condition:
+            # Move to next tabletop condition
             user.current_condition += 1
-        elif user.current_test_type == "tabletop":  # Move to robot_nav
+        elif user.current_test_type == "tabletop":
+            # Move from tabletop to robot_nav
             user.current_test_type = "robot_nav"
             user.current_condition = 0
-        else:  # All tests complete
+        elif user.current_test_type == "robot_nav" and user.current_condition < max_robot_nav_condition:
+            # Move to next robot_nav condition
+            user.current_condition += 1
+        else:
+            # All tests complete
             db.session.commit()
             return jsonify({
                 "message": "All tests completed!",
@@ -235,8 +339,8 @@ def submit_choice():
 @cross_origin(supports_credentials=True)
 @csrf_protect.exempt
 def submit_inter_round_survey():
-    from flask import session
     participant_id = session.get('user_id')
+    data = request.get_json()
     
     if not participant_id:
         return jsonify({"error": "Not logged in"}), 401
@@ -255,12 +359,112 @@ def submit_inter_round_survey():
     if not completed_progress:
         return jsonify({"error": "No pending inter-round survey found"}), 400
     
+    # Validate survey data
+    required_scale_fields = [
+        'mental_demand', 'success_level', 'frustration_level', 
+        'trajectory_choice_ease', 'difference_clarity', 'preference_learning'
+    ]
+    
+    for field in required_scale_fields:
+        value = data.get(field)
+        if not isinstance(value, int) or value < 1 or value > 5:
+            return jsonify({"error": f"{field} must be an integer between 1 and 5"}), 400
+    
+    decision_factors = data.get('decision_factors', '').strip()
+    if not decision_factors:
+        return jsonify({"error": "Decision factors response is required"}), 400
+    
+    # Check if survey response already exists (shouldn't happen, but safety check)
+    existing_response = InterRoundSurveyResponse.query.filter_by(
+        user_id=user.id,
+        test_type=completed_progress.test_type,
+        condition_number=completed_progress.condition_number
+    ).first()
+    
+    if existing_response:
+        return jsonify({"error": "Survey response already exists for this condition"}), 400
+    
+    # Create survey response
+    survey_response = InterRoundSurveyResponse(
+        user_id=user.id,
+        test_type=completed_progress.test_type,
+        condition_number=completed_progress.condition_number,
+        mental_demand=data['mental_demand'],
+        success_level=data['success_level'],
+        frustration_level=data['frustration_level'],
+        trajectory_choice_ease=data['trajectory_choice_ease'],
+        difference_clarity=data['difference_clarity'],
+        preference_learning=data['preference_learning'],
+        decision_factors=decision_factors
+    )
+    
+    db.session.add(survey_response)
+    
     # Mark survey as completed
     completed_progress.inter_round_survey_completed = True
     db.session.commit()
     
     return jsonify({
         "message": "Inter-round survey completed successfully",
+        "success": True
+    })
+
+@api.route("/check-pre-activity-survey", methods=["GET"])
+@cross_origin(supports_credentials=True)
+@csrf_protect.exempt
+def check_pre_activity_survey():
+    """Check if user has completed pre-activity survey (age and sex filled)"""
+    participant_id = session.get('user_id')
+    
+    if not participant_id:
+        return jsonify({"error": "Not logged in"}), 401
+    
+    user = User.query.filter_by(participant_id=participant_id).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    # Check if both age and sex are filled
+    is_completed = user.age is not None and user.sex is not None and user.sex.strip() != ""
+    
+    return jsonify({
+        "completed": is_completed,
+        "age": user.age,
+        "sex": user.sex
+    })
+
+@api.route("/submit-pre-activity-survey", methods=["POST"])
+@cross_origin(supports_credentials=True)
+@csrf_protect.exempt
+def submit_pre_activity_survey():
+    participant_id = session.get('user_id')
+    data = request.get_json()
+    
+    if not participant_id:
+        return jsonify({"error": "Not logged in"}), 401
+    
+    age = data.get("age")
+    sex = data.get("sex")
+    
+    if not age or not sex:
+        return jsonify({"error": "Age and sex are required"}), 400
+    
+    if not isinstance(age, int) or age < 1 or age > 120:
+        return jsonify({"error": "Age must be a number between 1 and 120"}), 400
+    
+    if not isinstance(sex, str) or sex.strip() == "":
+        return jsonify({"error": "Sex must be a non-empty string"}), 400
+    
+    user = User.query.filter_by(participant_id=participant_id).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    # Update user with pre-activity survey data
+    user.age = age
+    user.sex = sex.strip()
+    db.session.commit()
+    
+    return jsonify({
+        "message": "Pre-activity survey submitted successfully",
         "success": True
     })
 
