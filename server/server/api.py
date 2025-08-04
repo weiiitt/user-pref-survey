@@ -121,13 +121,25 @@ def get_user_progress() -> int:
     total_questions = tabletop_total + robot_nav_total
     
     if test_type == "tabletop":
-        # Sum questions from completed tabletop conditions + current progress
-        completed_tabletop = sum(structure["tabletop"][c] for c in structure["tabletop"] if c < condition)
+        # Sum questions from completed tabletop conditions based on randomized order
+        completed_tabletop = 0
+        if user.current_condition_index > 0:
+            # Sum questions from conditions completed so far in the randomized order
+            for i in range(user.current_condition_index):
+                completed_condition = user.tabletop_condition_order[i]
+                completed_tabletop += structure["tabletop"].get(completed_condition, 0)
+        
         current_progress = completed_tabletop + question_num
         return jsonify({"percent_answered": current_progress / total_questions})
     elif test_type == "robot_nav":
-        # All tabletop questions + completed robot_nav conditions + current progress
-        completed_robot_nav = sum(structure["robot_nav"][c] for c in structure["robot_nav"] if c < condition)
+        # All tabletop questions (fully completed) + completed robot_nav conditions based on randomized order
+        completed_robot_nav = 0
+        if user.current_condition_index > 0:
+            # Sum questions from robot_nav conditions completed so far in the randomized order
+            for i in range(user.current_condition_index):
+                completed_condition = user.robot_nav_condition_order[i]
+                completed_robot_nav += structure["robot_nav"].get(completed_condition, 0)
+        
         current_progress = tabletop_total + completed_robot_nav + question_num
         return jsonify({"percent_answered": current_progress / total_questions})
     else:
@@ -156,9 +168,6 @@ def get_question_images():
     
     test_type, condition, question_num = user.check_user_progress()
     current_app.logger.info(f"Progress check result: test_type={test_type}, condition={condition}, question_num={question_num}")
-    
-    # Save any changes from randomized order initialization for existing users
-    db.session.commit()
     
     # Check if there's a pending inter-round survey
     pending_survey = UserTestProgress.query.filter_by(
@@ -302,13 +311,8 @@ def submit_choice():
         max_robot_nav_condition = available_conditions["robot_nav"]
         
         # Check if this is the final completion using randomized order
-        if user.robot_nav_condition_order:
-            # For users with randomized orders
-            is_final_completion = (user.current_test_type == "robot_nav" and 
-                                 user.current_condition_index >= len(user.robot_nav_condition_order) - 1)
-        else:
-            # Fallback for users without randomized orders
-            is_final_completion = (user.current_condition == max_robot_nav_condition and user.current_test_type == "robot_nav")
+        is_final_completion = (user.current_test_type == "robot_nav" and 
+                             user.current_condition_index >= len(user.robot_nav_condition_order) - 1)
         
         if not is_final_completion:
             show_inter_round_survey = True
@@ -316,18 +320,21 @@ def submit_choice():
         # Move to next condition using randomized order
         if user.current_test_type == "tabletop":
             # Check if there are more tabletop conditions in the randomized order
-            if user.tabletop_condition_order and user.current_condition_index + 1 < len(user.tabletop_condition_order):
+            if user.current_condition_index + 1 < len(user.tabletop_condition_order):
                 # Move to next tabletop condition in randomized order
                 user.current_condition_index += 1
+                user.current_condition = user.tabletop_condition_order[user.current_condition_index]
             else:
                 # Move from tabletop to robot_nav, reset index
                 user.current_test_type = "robot_nav"
                 user.current_condition_index = 0
+                user.current_condition = user.robot_nav_condition_order[0]
         elif user.current_test_type == "robot_nav":
             # Check if there are more robot_nav conditions in the randomized order
-            if user.robot_nav_condition_order and user.current_condition_index + 1 < len(user.robot_nav_condition_order):
+            if user.current_condition_index + 1 < len(user.robot_nav_condition_order):
                 # Move to next robot_nav condition in randomized order
                 user.current_condition_index += 1
+                user.current_condition = user.robot_nav_condition_order[user.current_condition_index]
             else:
                 # All tests complete
                 db.session.commit()
@@ -336,24 +343,7 @@ def submit_choice():
                     "completed": True,
                     "show_inter_round_survey": False
                 })
-        else:
-            # Fallback to sequential logic for users without randomized orders
-            if user.current_test_type == "tabletop" and user.current_condition < max_tabletop_condition:
-                user.current_condition += 1
-            elif user.current_test_type == "tabletop":
-                user.current_test_type = "robot_nav"
-                user.current_condition = 0
-            elif user.current_test_type == "robot_nav" and user.current_condition < max_robot_nav_condition:
-                user.current_condition += 1
-            else:
-                db.session.commit()
-                return jsonify({
-                    "message": "All tests completed!",
-                    "completed": True,
-                    "show_inter_round_survey": False
-                })
     
-    # Save any changes from randomized order initialization for existing users
     db.session.commit()
     
     # Return current status

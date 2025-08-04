@@ -77,7 +77,8 @@ def register_anonymous():
     new_user = User(
         participant_id=participant_id,
         tabletop_condition_order=tabletop_conditions,
-        robot_nav_condition_order=robot_nav_conditions
+        robot_nav_condition_order=robot_nav_conditions,
+        current_condition=tabletop_conditions[0]  # Start with first condition in randomized order
     )
     db.session.add(new_user)
     db.session.commit()
