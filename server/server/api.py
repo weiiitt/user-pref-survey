@@ -154,7 +154,7 @@ def get_question_images():
     current_app.logger.info(f"Fetching images for participant: {participant_id}")
     
     if not participant_id:
-        return jsonify({"error": "Not logged in"}), 401
+        return jsonify({"error": "Not logged in"}), 403
     
     user = User.query.filter_by(participant_id=participant_id).first()
     if not user:
@@ -258,7 +258,7 @@ def submit_choice():
     response_time = data.get("response_time")  # response time in seconds from frontend
     
     if not participant_id:
-        return jsonify({"error": "Not logged in"}), 401
+        return jsonify({"error": "Not logged in"}), 403
     
     if choice not in [0, 1]:
         return jsonify({"error": "Choice must be 0 or 1"}), 400
@@ -365,7 +365,7 @@ def submit_inter_round_survey():
     data = request.get_json()
     
     if not participant_id:
-        return jsonify({"error": "Not logged in"}), 401
+        return jsonify({"error": "Not logged in"}), 403
     
     user = User.query.filter_by(participant_id=participant_id).first()
     if not user:
@@ -439,7 +439,7 @@ def check_pre_activity_survey():
     participant_id = session.get('user_id')
     
     if not participant_id:
-        return jsonify({"error": "Not logged in"}), 401
+        return jsonify({"error": "Not logged in"}), 403
     
     user = User.query.filter_by(participant_id=participant_id).first()
     if not user:
@@ -462,7 +462,7 @@ def submit_pre_activity_survey():
     data = request.get_json()
     
     if not participant_id:
-        return jsonify({"error": "Not logged in"}), 401
+        return jsonify({"error": "Not logged in"}), 403
     
     age = data.get("age")
     sex = data.get("sex")
