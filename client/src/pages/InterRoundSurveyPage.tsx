@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import '../styles/LandingPage.css';
+import '../styles/InterRoundSurveyPage.css';
 import Navbar from '../components/Navbar';
 import { submitInterRoundSurvey, checkLoginStatus } from '../utils/api';
 
@@ -77,64 +77,64 @@ function InterRoundSurveyPage() {
         }
     };
 
-    const renderScaleQuestion = (field: string, question: string, scaleOptions: { value: number; label: string }[]) => (
+    const renderScaleQuestion = (field: string, question: string, scaleOptions: { value: number }[]) => (
         <div className="survey-form-field">
             <label className="survey-form-label">{question}</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
+            <div className="survey-radio-group">
+                <div className="survey-radio-group-left">
+                    <p>Not at all</p>
+                </div>
                 {scaleOptions.map(option => (
-                    <label key={option.value} style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        cursor: 'pointer',
-                        fontSize: '1rem',
-                        fontWeight: 'normal'
-                    }}>
+                    <label key={option.value} className="survey-radio-option">
                         <input
                             type="radio"
                             name={field}
                             value={option.value}
                             checked={responses[field as keyof typeof responses] === option.value}
                             onChange={() => handleResponseChange(field, option.value)}
-                            style={{ marginRight: '10px', transform: 'scale(1.2)', accentColor: 'var(--button-color)' }}
+                            className="survey-radio-input"
                         />
-                        {option.label}
+                        {option.value}
                     </label>
                 ))}
+                <div className="survey-radio-group-right">
+                    <p>Extremely</p>
+                </div>
             </div>
         </div>
     );
 
     const scaleOptions = [
-        { value: 1, label: '1 - Strongly Disagree' },
-        { value: 2, label: '2 - Disagree' },
-        { value: 3, label: '3 - Neutral' },
-        { value: 4, label: '4 - Agree' },
-        { value: 5, label: '5 - Strongly Agree' }
+        { value: 1 },
+        { value: 2 },
+        { value: 3 },
+        { value: 4 },
+        { value: 5 }
     ];
 
     const demandScaleOptions = [
-        { value: 1, label: '1 - Very Low' },
-        { value: 2, label: '2 - Low' },
-        { value: 3, label: '3 - Moderate' },
-        { value: 4, label: '4 - High' },
-        { value: 5, label: '5 - Very High' }
+        { value: 1 },
+        { value: 2 },
+        { value: 3 },
+        { value: 4 },
+        { value: 5 }
     ];
 
     const successScaleOptions = [
-        { value: 1, label: '1 - Not at all' },
-        { value: 2, label: '2 - Slightly' },
-        { value: 3, label: '3 - Moderately' },
-        { value: 4, label: '4 - Very much' },
-        { value: 5, label: '5 - Extremely' }
+        { value: 1 },
+        { value: 2 },
+        { value: 3 },
+        { value: 4 },
+        { value: 5 }
     ];
 
     // Show loading state while checking status
     if (isChecking) {
         return (
-            <div className="landing-page">
+            <div className="page-layout">
                 <Navbar />
-                <div className='landing-page-content'>
-                    <div className='landing-page-content-text'>
+                <div className='page-content'>
+                    <div className='page-content-text'>
                         <h1>Loading...</h1>
                         <p>Checking your progress...</p>
                     </div>
@@ -144,10 +144,10 @@ function InterRoundSurveyPage() {
     }
 
     return (
-        <div className="landing-page">
+        <div className="page-layout">
             <Navbar />
-            <div className='landing-page-content'>
-                <div className='landing-page-content-text'>
+            <div className='page-content'>
+                <div className='page-content-text'>
                     <h1>Inter-Round Survey</h1>
                     <p>
                         Please answer the following questions about your experience with the task you just completed.
@@ -195,12 +195,7 @@ function InterRoundSurveyPage() {
                             <label className="survey-form-label">
                                 What factors did you consider when choosing between the two robot trajectories?
                             </label>
-                            <p style={{ 
-                                fontSize: '0.9rem', 
-                                color: 'var(--text-color)', 
-                                opacity: 0.8, 
-                                marginBottom: '10px' 
-                            }}>
+                            <p className="survey-form-hint">
                                 Please describe in your own words. For example, you might mention safety, efficiency, 
                                 terrain type, object avoidance, or any other criteria you used.
                             </p>

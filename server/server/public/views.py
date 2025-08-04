@@ -64,8 +64,21 @@ def register_anonymous():
     if existing_user:
         return jsonify({"error": "Participant ID already exists. Please try logging in instead."}), 409
     
-    # Create a new User record
-    new_user = User(participant_id=participant_id)
+    # Generate randomized condition orders
+    from server.api import get_available_conditions
+    available_conditions = get_available_conditions()
+    tabletop_conditions = list(range(available_conditions["tabletop"] + 1))  # [0, 1, 2]
+    robot_nav_conditions = list(range(available_conditions["robot_nav"] + 1))  # [0, 1, 2]
+    
+    random.shuffle(tabletop_conditions)
+    random.shuffle(robot_nav_conditions)
+    
+    # Create a new User record with randomized condition orders
+    new_user = User(
+        participant_id=participant_id,
+        tabletop_condition_order=tabletop_conditions,
+        robot_nav_condition_order=robot_nav_conditions
+    )
     db.session.add(new_user)
     db.session.commit()
 

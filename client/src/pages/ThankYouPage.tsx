@@ -25,10 +25,10 @@ function ThankYouPage() {
 	};
 
 	return (
-		<div className="landing-page">
+		<div className="page-layout">
 			<Navbar />
-			<div className='landing-page-content'>
-				<div className='landing-page-content-text'>
+			<div className='page-content'>
+				<div className='page-content-text'>
 					<h1>Thank You!</h1>
 					<p>
 						<b>You have successfully completed the survey.</b>

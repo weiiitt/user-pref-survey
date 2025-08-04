@@ -1,3 +1,4 @@
+
 .landing-page {
     display: flex;
     flex-direction: row;
@@ -234,53 +235,4 @@
     border-color: var(--text-color);
 }
 
-/* Pre-Activity Survey Form Styles */
-.survey-form-field {
-    margin-bottom: 20px;
-}
 
-.survey-form-label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--text-color);
-    font-size: 1.1rem;
-    font-weight: 500;
-}
-
-.survey-form-input {
-    padding: 12px;
-    font-size: 1.1rem;
-    border: 2px solid var(--container-color);
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
-    width: 200px;
-    font-family: inherit;
-}
-
-.survey-form-input:focus {
-    outline: none;
-    border-color: var(--button-color);
-}
-
-.survey-form-select {
-    padding: 12px;
-    font-size: 1.1rem;
-    border: 2px solid var(--container-color);
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--text-color);
-    width: 200px;
-    font-family: inherit;
-    text-align: left;
-}
-
-.survey-form-select:focus {
-    outline: none;
-    border-color: var(--button-color);
-}
-
-.survey-form-select option {
-    background-color: var(--base-color);
-    color: var(--text-color);
-}

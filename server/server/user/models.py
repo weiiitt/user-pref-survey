@@ -41,8 +41,35 @@ class User(UserMixin, PkModel):
     age = Column(db.Integer, nullable=True)
     sex = Column(db.String(20), nullable=True)
 
+    def initialize_randomized_orders_if_needed(self):
+        """Initialize randomized orders for users who don't have them (backward compatibility)."""
+        if not self.tabletop_condition_order or not self.robot_nav_condition_order:
+            from server.api import get_available_conditions
+            import random
+            
+            available_conditions = get_available_conditions()
+            
+            if not self.tabletop_condition_order:
+                tabletop_conditions = list(range(available_conditions["tabletop"] + 1))
+                random.shuffle(tabletop_conditions)
+                self.tabletop_condition_order = tabletop_conditions
+            
+            if not self.robot_nav_condition_order:
+                robot_nav_conditions = list(range(available_conditions["robot_nav"] + 1))
+                random.shuffle(robot_nav_conditions)
+                self.robot_nav_condition_order = robot_nav_conditions
+            
+            # Set current_condition_index based on current_condition for backward compatibility
+            if self.current_test_type == "tabletop" and self.current_condition in self.tabletop_condition_order:
+                self.current_condition_index = self.tabletop_condition_order.index(self.current_condition)
+            elif self.current_test_type == "robot_nav" and self.current_condition in self.robot_nav_condition_order:
+                self.current_condition_index = self.robot_nav_condition_order.index(self.current_condition)
+
     def get_current_condition_from_order(self):
         """Get the actual condition number based on randomized order."""
+        # Initialize randomized orders if they don't exist (backward compatibility)
+        self.initialize_randomized_orders_if_needed()
+        
         if self.current_test_type == "tabletop" and self.tabletop_condition_order:
             if self.current_condition_index < len(self.tabletop_condition_order):
                 return self.tabletop_condition_order[self.current_condition_index]
@@ -50,7 +77,7 @@ class User(UserMixin, PkModel):
             if self.current_condition_index < len(self.robot_nav_condition_order):
                 return self.robot_nav_condition_order[self.current_condition_index]
         
-        # Fallback to current_condition for backward compatibility
+        # Fallback to current_condition for edge cases
         return self.current_condition
 
     def check_user_progress(self):

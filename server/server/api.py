@@ -157,6 +157,9 @@ def get_question_images():
     test_type, condition, question_num = user.check_user_progress()
     current_app.logger.info(f"Progress check result: test_type={test_type}, condition={condition}, question_num={question_num}")
     
+    # Save any changes from randomized order initialization for existing users
+    db.session.commit()
+    
     # Check if there's a pending inter-round survey
     pending_survey = UserTestProgress.query.filter_by(
         user_id=user.id,
@@ -297,31 +300,60 @@ def submit_choice():
         # Check if we need to show inter-round survey (not for the final completion)
         max_tabletop_condition = available_conditions["tabletop"]
         max_robot_nav_condition = available_conditions["robot_nav"]
-        is_final_completion = (user.current_condition == max_robot_nav_condition and user.current_test_type == "robot_nav")
+        
+        # Check if this is the final completion using randomized order
+        if user.robot_nav_condition_order:
+            # For users with randomized orders
+            is_final_completion = (user.current_test_type == "robot_nav" and 
+                                 user.current_condition_index >= len(user.robot_nav_condition_order) - 1)
+        else:
+            # Fallback for users without randomized orders
+            is_final_completion = (user.current_condition == max_robot_nav_condition and user.current_test_type == "robot_nav")
         
         if not is_final_completion:
             show_inter_round_survey = True
         
-        # Move to next condition or test type
-        if user.current_test_type == "tabletop" and user.current_condition < max_tabletop_condition:
-            # Move to next tabletop condition
-            user.current_condition += 1
-        elif user.current_test_type == "tabletop":
-            # Move from tabletop to robot_nav
-            user.current_test_type = "robot_nav"
-            user.current_condition = 0
-        elif user.current_test_type == "robot_nav" and user.current_condition < max_robot_nav_condition:
-            # Move to next robot_nav condition
-            user.current_condition += 1
+        # Move to next condition using randomized order
+        if user.current_test_type == "tabletop":
+            # Check if there are more tabletop conditions in the randomized order
+            if user.tabletop_condition_order and user.current_condition_index + 1 < len(user.tabletop_condition_order):
+                # Move to next tabletop condition in randomized order
+                user.current_condition_index += 1
+            else:
+                # Move from tabletop to robot_nav, reset index
+                user.current_test_type = "robot_nav"
+                user.current_condition_index = 0
+        elif user.current_test_type == "robot_nav":
+            # Check if there are more robot_nav conditions in the randomized order
+            if user.robot_nav_condition_order and user.current_condition_index + 1 < len(user.robot_nav_condition_order):
+                # Move to next robot_nav condition in randomized order
+                user.current_condition_index += 1
+            else:
+                # All tests complete
+                db.session.commit()
+                return jsonify({
+                    "message": "All tests completed!",
+                    "completed": True,
+                    "show_inter_round_survey": False
+                })
         else:
-            # All tests complete
-            db.session.commit()
-            return jsonify({
-                "message": "All tests completed!",
-                "completed": True,
-                "show_inter_round_survey": False
-            })
+            # Fallback to sequential logic for users without randomized orders
+            if user.current_test_type == "tabletop" and user.current_condition < max_tabletop_condition:
+                user.current_condition += 1
+            elif user.current_test_type == "tabletop":
+                user.current_test_type = "robot_nav"
+                user.current_condition = 0
+            elif user.current_test_type == "robot_nav" and user.current_condition < max_robot_nav_condition:
+                user.current_condition += 1
+            else:
+                db.session.commit()
+                return jsonify({
+                    "message": "All tests completed!",
+                    "completed": True,
+                    "show_inter_round_survey": False
+                })
     
+    # Save any changes from randomized order initialization for existing users
     db.session.commit()
     
     # Return current status

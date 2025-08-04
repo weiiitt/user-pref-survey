@@ -1,0 +1,62 @@
+/* Inter-Round Survey Page Styles */
+
+.survey-radio-group {
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    margin-top: 10px;
+}
+
+.survey-radio-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: normal;
+    color: var(--text-color);
+    flex-direction: column;
+    gap: 5px;
+    padding-bottom: 0px;
+}
+
+.survey-radio-input {
+    transform: scale(1.2);
+    accent-color: var(--button-color);
+}
+
+.survey-form-hint {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.survey-radio-group-left,
+.survey-radio-group-right {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+.survey-form-textarea {
+    padding: 12px;
+    font-size: 1.1rem;
+    border: 2px solid var(--container-color);
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    width: calc(100% - 40px);
+    font-family: inherit;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.survey-form-textarea:focus {
+    outline: none;
+    border-color: var(--button-color);
+}
+

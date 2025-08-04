@@ -92,10 +92,10 @@ function PreActivityPage() {
     // Show loading state while checking status
     if (isChecking) {
         return (
-            <div className="landing-page">
+            <div className="page-layout">
                 <Navbar />
-                <div className='landing-page-content'>
-                    <div className='landing-page-content-text'>
+                <div className='page-content'>
+                    <div className='page-content-text'>
                         <h1>Loading...</h1>
                         <p>Checking your progress...</p>
                     </div>
@@ -105,10 +105,10 @@ function PreActivityPage() {
     }
 
     return (
-        <div className="landing-page">
+        <div className="page-layout">
             <Navbar />
-            <div className='landing-page-content'>
-                <div className='landing-page-content-text'>
+            <div className='page-content'>
+                <div className='page-content-text'>
                     <h1>Pre-Activity Survey</h1>
                     <p>
                         Before we begin the main study, please complete this short pre-activity survey.
