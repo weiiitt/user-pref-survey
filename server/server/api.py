@@ -103,49 +103,6 @@ def get_survey_config():
         "structure": structure
     })
 
-def calculate_user_progress_internal(user):
-    """
-    Calculate user progress based on randomized condition order.
-    Returns dict with current_progress and total_questions.
-    """
-    test_type, condition, question_num = user.check_user_progress()
-    structure = get_survey_structure()
-    
-    # Calculate total questions dynamically
-    tabletop_total = sum(structure["tabletop"].values())
-    robot_nav_total = sum(structure["robot_nav"].values())
-    total_questions = tabletop_total + robot_nav_total
-    
-    if test_type == "tabletop":
-        # Sum questions from completed tabletop conditions based on randomized order
-        completed_tabletop = 0
-        if user.current_condition_index > 0:
-            for i in range(user.current_condition_index):
-                completed_condition = user.tabletop_condition_order[i]
-                completed_tabletop += structure["tabletop"].get(completed_condition, 0)
-        
-        current_progress = completed_tabletop + question_num + 1
-    else:  # robot_nav
-        # Sum ALL completed tabletop questions (user finished all tabletop conditions)
-        completed_tabletop = 0
-        for condition in user.tabletop_condition_order:
-            completed_tabletop += structure["tabletop"].get(condition, 0)
-        
-        # Sum questions from completed robot_nav conditions based on randomized order
-        completed_robot_nav = 0
-        if user.current_condition_index > 0:
-            for i in range(user.current_condition_index):
-                completed_condition = user.robot_nav_condition_order[i]
-                completed_robot_nav += structure["robot_nav"].get(completed_condition, 0)
-        
-        current_progress = completed_tabletop + completed_robot_nav + question_num + 1
-    
-    return {
-        "current_progress": current_progress,
-        "total_questions": total_questions
-    }
-
-
 
 @api.route("/get-question-images", methods=["GET"])
 @cross_origin(supports_credentials=True)

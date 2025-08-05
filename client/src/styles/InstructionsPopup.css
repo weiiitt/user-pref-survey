@@ -110,6 +110,38 @@
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+/* Material grid for ground textures */
+.material-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin: 20px 0 0 0;
+}
+
+.material-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+}
+
+.material-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--text-color);
+  background: var(--container-color);
+  margin-bottom: 8px;
+}
+
+.material-label {
+  color: var(--text-color);
+  font-size: 1em;
+  text-align: center;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .popup-content {

@@ -28,8 +28,31 @@ export default function InstructionsPopup({ isVisible, onClose, testType }: Inst
 						</div>
 					) : (
 						<div>
-							<p>[Robot navigation instructions - you can fill this in]</p>
-							<p>This is where you'll add the specific instructions for the robot navigation task.</p>
+							<p>For this task you will be deciding the best path for a food delivery robot. You'll see two trajectory options - choose your preferred one.</p>
+							<p>Your goal is to teach the robot to reach its destination quickly. Crossing main roads (asphalt) may take more time and be riskier due to cars, while some surfaces (like grass or brick) might be slower or bumpier.</p>
+							<p>These are the surfaces the robot might encounter:</p>
+							<div className="material-grid">
+								<div className="material-item">
+									<img src="https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/default/worlds/textures/grass.jpg" alt="Grass" className="material-image" />
+									<div className="material-label">Grass</div>
+								</div>
+								<div className="material-item">
+									<img src="https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/textures/rough_concrete/rough_concrete_base_color.jpg" alt="Concrete" className="material-image" />
+									<div className="material-label">Concrete</div>
+								</div>
+								<div className="material-item">
+									<img src="https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/default/worlds/textures/gray_brick_wall.jpg" alt="Paved" className="material-image" />
+									<div className="material-label">Paved</div>
+								</div>
+								<div className="material-item">
+									<img src="https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/textures/red_bricks/red_bricks_base_color.jpg" alt="Brick" className="material-image" />
+									<div className="material-label">Brick</div>
+								</div>
+								<div className="material-item">
+									<img src="https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/default/worlds/textures/asphalt.jpg" alt="Asphalt" className="material-image" />
+									<div className="material-label">Asphalt</div>
+								</div>
+							</div>
 						</div>
 					)}
 				</div>
