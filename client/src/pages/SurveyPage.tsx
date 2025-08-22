@@ -224,7 +224,7 @@ function SurveyPage() {
 	return (
 		<div className="survey-container">
 			{!questionData ? (
-				<div>Loading... (if this persists, please refresh the page)</div>
+				<div>Loading...</div>
 			) : (
 				<>
 					<Navbar onShowInstructions={handleShowInstructions} timer={questionStartTime !== null && !showInstructions ? currentTime : null} onPause={handlePause} isPaused={isPaused} />

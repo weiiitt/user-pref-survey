@@ -8,13 +8,14 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --background-color: hsl(195, 3%, 8%);
-  --base-color: hsl(195, 3%, 10%);
+  --background-color: hsl(195, 3%, 100%);
+  --base-color: hsl(195, 3%, 95%);
   --overlay-color: hsla(215, 3%, 0%, 0.5);
-  --container-color: hsla(215, 5%, 18%, 0.8);
-  --button-color: hsl(215, 74%, 53%);
-  --button-highlight-color: hsl(215, 74%, 63%);
-  --text-color: hsl(195, 3%, 92%);
+  --container-color: hsla(215, 5%, 90%, 0.8);
+  --button-color: hsl(215, 74%, 50%);
+  --button-highlight-color: hsl(215, 74%, 60%);
+  --text-color: hsl(195, 3%, 5%);
+  --button-text-color: hsl(195, 3%, 100%);
 }
 
 
@@ -59,6 +60,7 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  color: var(--button-text-color);
 }
 button:hover {
   border-color: #646cff;

@@ -88,6 +88,10 @@
   justify-content: left;
 }
 
+.popup-footer button {
+  color: var(--button-text-color);
+}
+
 .close-popup-button {
   background-color: var(--button-color);
   color: white;

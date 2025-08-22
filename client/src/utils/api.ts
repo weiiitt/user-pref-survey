@@ -3,6 +3,10 @@ import type { PreviousAnswer, RouteResponse } from '../types/APIResponses';
 
 export const API_URL = 'https://minnow-tolerant-usefully.ngrok-free.app';
 
+// Ensure all requests include the ngrok bypass header and send cookies by default
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
+
 interface RandomRoutesResponse {
   routes: RouteResponse[];
 }

@@ -50,7 +50,7 @@
 
 .instructions-button {
     background-color: var(--button-color);
-    color: var(--text-color);
+    color: var(--button-text-color);
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
@@ -65,7 +65,7 @@
 
 .logout-button {
     background-color: var(--button-color);
-    color: var(--text-color);
+    color: var(--button-text-color);
     border: none;
     padding: 8px 16px;
     border-radius: 4px;
