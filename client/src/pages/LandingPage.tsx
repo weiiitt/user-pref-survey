@@ -75,7 +75,7 @@ function LandingPage({ onLoginSuccess }: { onLoginSuccess: (id: string) => void 
                                 <b>IRB Protocol Number: 25-0429</b>
                                 </p>
                                 <p>
-                                <b>Investigator: Yi-Shiuan Tung</b>
+                                <b>Investigator: Alessandro Roncone, Bradley Hayes</b>
                                 </p>
                                 <p>
                                 You are invited to take part in a research study about how people prefer robots to behave in common tasks such as navigation and object handling. The purpose of this study is to understand how humans make decisions when comparing robot actions, so we can improve robot learning algorithms.
