@@ -39,6 +39,7 @@
 
 .question-navigation button {
     background-color: var(--button-color);
+    color: var(--button-text-color);
     border: none;
     transition: background-color 0.15s ease-in-out;
 }
