@@ -254,7 +254,7 @@ function SurveyPage() {
 						{loadError ? (
 							<div>
 								<h3>Couldn’t load options</h3>
-								<p>Try refreshing the page. If this problem persists, contact Yi Shiuan using the contact info on the landing page.</p>
+								<p>Try refreshing the page. If this problem persists, please contact the principal investigator, Yi-Shiuan Tung, at yi-shiuan.tung@colorado.edu.</p>
 							</div>
 						) : (
 							<div className={`images-section ${selectedChoice !== null ? 'processing' : ''} ${isPaused ? 'paused' : ''}`}>
