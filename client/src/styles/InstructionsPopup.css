@@ -94,7 +94,7 @@
 
 .close-popup-button {
   background-color: var(--button-color);
-  color: white;
+  color: var(--button-text-color);
   border: none;
   padding: 0.6em 1.2em;
   border-radius: 8px;

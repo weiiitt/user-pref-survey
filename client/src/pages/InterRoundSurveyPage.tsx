@@ -94,23 +94,9 @@ function InterRoundSurveyPage() {
         { value: 2 },
         { value: 3 },
         { value: 4 },
-        { value: 5 }
-    ];
-
-    const demandScaleOptions = [
-        { value: 1 },
-        { value: 2 },
-        { value: 3 },
-        { value: 4 },
-        { value: 5 }
-    ];
-
-    const successScaleOptions = [
-        { value: 1 },
-        { value: 2 },
-        { value: 3 },
-        { value: 4 },
-        { value: 5 }
+        { value: 5 },
+        { value: 6 },
+        { value: 7 }
     ];
 
     // Show loading state while checking status
@@ -143,19 +129,19 @@ function InterRoundSurveyPage() {
                         {renderScaleQuestion(
                             'mental_demand',
                             'How mentally demanding was the task?',
-                            demandScaleOptions
+                            scaleOptions
                         )}
 
                         {renderScaleQuestion(
                             'success_level',
                             'How successful were you in accomplishing what you were asked to do?',
-                            successScaleOptions
+                            scaleOptions
                         )}
 
                         {renderScaleQuestion(
                             'frustration_level',
                             'How discouraged, irritated, stressed, or annoyed were you?',
-                            demandScaleOptions
+                            scaleOptions
                         )}
 
                         {renderScaleQuestion(

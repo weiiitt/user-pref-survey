@@ -37,16 +37,16 @@
     box-shadow: none;
 }
 
-.accordion-button::after {
+/* .accordion-button::after {
     filter: brightness(0) invert(1);
-}
+} */
 
 .start-button {
     background-color: var(--button-color);
+    color: var(--button-text-color);
     border: none;
     transition: background-color 0.15s ease-in-out;
     font-size: 1.5em;
-    color: var(--text-color);
 }
 
 .start-button:disabled {
@@ -206,7 +206,7 @@
 
 .login-button {
     background-color: var(--button-color);
-    color: white;
+    color: var(--button-text-color);
     border: none;
     padding: 10px 20px;
     border-radius: 6px;
