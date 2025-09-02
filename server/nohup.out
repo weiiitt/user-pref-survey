@@ -1,0 +1,286 @@
+ Container server-survey-flask-dev-1  Created
+Attaching to survey-flask-dev-1
+survey-flask-dev-1  | 
+survey-flask-dev-1  | > server@1.0.0 start
+survey-flask-dev-1  | > run-script-os
+survey-flask-dev-1  | 
+survey-flask-dev-1  | 
+survey-flask-dev-1  | > server@1.0.0 start:default
+survey-flask-dev-1  | > concurrently -n "WEBPACK,FLASK" -c "bgBlue.bold,bgMagenta.bold" "npm run webpack-watch" "npm run flask-server"
+survey-flask-dev-1  | 
+survey-flask-dev-1  | [FLASK] 
+survey-flask-dev-1  | [FLASK] > server@1.0.0 flask-server
+survey-flask-dev-1  | [FLASK] > flask run --host=0.0.0.0
+survey-flask-dev-1  | [FLASK] 
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] > server@1.0.0 webpack-watch
+survey-flask-dev-1  | [WEBPACK] > run-script-os
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] > server@1.0.0 webpack-watch:default
+survey-flask-dev-1  | [WEBPACK] > NODE_ENV=debug webpack --mode development --watch
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [FLASK] [2025-08-08 07:09:06,401] INFO in app: API blueprint registered successfully
+survey-flask-dev-1  | [FLASK]  * Serving Flask app 'autoapp.py'
+survey-flask-dev-1  | [FLASK]  * Debug mode: on
+survey-flask-dev-1  | [FLASK] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+survey-flask-dev-1  | [FLASK]  * Running on all addresses (0.0.0.0)
+survey-flask-dev-1  | [FLASK]  * Running on http://127.0.0.1:5000
+survey-flask-dev-1  | [FLASK]  * Running on http://172.18.0.2:5000
+survey-flask-dev-1  | [FLASK] [33mPress CTRL+C to quit[0m
+survey-flask-dev-1  | [FLASK]  * Restarting with stat
+survey-flask-dev-1  | [FLASK] [2025-08-08 07:09:06,762] INFO in app: API blueprint registered successfully
+survey-flask-dev-1  | [FLASK]  * Debugger is active!
+survey-flask-dev-1  | [FLASK]  * Debugger PIN: 276-913-362
+survey-flask-dev-1  | [WEBPACK] assets by status 300 KiB [cached] 4 assets
+survey-flask-dev-1  | [WEBPACK] assets by status 2.81 MiB [compared for emit]
+survey-flask-dev-1  | [WEBPACK]   assets by path *.ttf 699 KiB
+survey-flask-dev-1  | [WEBPACK]     asset fa-solid-900.ttf 416 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-brands-400.ttf 206 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-regular-400.ttf 66.5 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-v4compatibility.ttf 10.6 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]   assets by path *.js 1.7 MiB
+survey-flask-dev-1  | [WEBPACK]     asset main_js.bundle.js 1.69 MiB [compared for emit] (name: main_js)
+survey-flask-dev-1  | [WEBPACK]     asset main_css.bundle.js 4.67 KiB [compared for emit] (name: main_css)
+survey-flask-dev-1  | [WEBPACK]   asset main_css.bundle.css 380 KiB [compared for emit] (name: main_css)
+survey-flask-dev-1  | [WEBPACK]   asset favicon.ico 58.2 KiB [compared for emit] [from: assets/img/favicon.ico] (auxiliary name: main_js)
+survey-flask-dev-1  | [WEBPACK] Entrypoint main_js 1.69 MiB (58.2 KiB) = main_js.bundle.js 1 auxiliary asset
+survey-flask-dev-1  | [WEBPACK] Entrypoint main_css 385 KiB (999 KiB) = main_css.bundle.css 380 KiB main_css.bundle.js 4.67 KiB 8 auxiliary assets
+survey-flask-dev-1  | [WEBPACK] orphan modules 1.21 MiB (javascript) 999 KiB (asset) 1.03 KiB (runtime) [orphan] 39 modules
+survey-flask-dev-1  | [WEBPACK] runtime modules 2.83 KiB 14 modules
+survey-flask-dev-1  | [WEBPACK] javascript modules 585 KiB
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/@popperjs/core/lib/ 68.8 KiB 57 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./assets/ 723 bytes 5 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/@fortawesome/fontawesome-free/ 104 KiB 2 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/bootstrap/dist/ 133 KiB 2 modules
+survey-flask-dev-1  | [WEBPACK]   ./node_modules/jquery/dist/jquery.js 279 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] css modules 380 KiB
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./node_modules/@fortawesome/fontawesome-free/css/all.css 105 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./node_modules/bootstrap/dist/css/bootstrap.css 274 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./assets/css/style.css 1.14 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] ./assets/img/favicon.ico 58.2 KiB (asset) 42 bytes (javascript) [optional] [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] webpack 5.99.8 compiled successfully in 1098 ms
+survey-flask-dev-1  | npm error path /app
+survey-flask-dev-1  | npm error command failed
+survey-flask-dev-1  | npm error signal SIGTERM
+survey-flask-dev-1  | npm error command sh -c run-script-os
+survey-flask-dev-1  | npm error A complete log of this run can be found in: /root/.npm/_logs/2025-08-08T07_09_05_637Z-debug-0.log
+[Ksurvey-flask-dev-1 exited with code 1
+ Container server-survey-flask-dev-1  Creating
+ Container server-survey-flask-dev-1  Created
+Attaching to survey-flask-dev-1
+survey-flask-dev-1  | 
+survey-flask-dev-1  | > server@1.0.0 start
+survey-flask-dev-1  | > run-script-os
+survey-flask-dev-1  | 
+survey-flask-dev-1  | 
+survey-flask-dev-1  | > server@1.0.0 start:default
+survey-flask-dev-1  | > concurrently -n "WEBPACK,FLASK" -c "bgBlue.bold,bgMagenta.bold" "npm run webpack-watch" "npm run flask-server"
+survey-flask-dev-1  | 
+survey-flask-dev-1  | [FLASK] 
+survey-flask-dev-1  | [FLASK] > server@1.0.0 flask-server
+survey-flask-dev-1  | [FLASK] > flask run --host=0.0.0.0
+survey-flask-dev-1  | [FLASK] 
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] > server@1.0.0 webpack-watch
+survey-flask-dev-1  | [WEBPACK] > run-script-os
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] > server@1.0.0 webpack-watch:default
+survey-flask-dev-1  | [WEBPACK] > NODE_ENV=debug webpack --mode development --watch
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [FLASK] [2025-08-08 07:18:01,340] INFO in app: API blueprint registered successfully
+survey-flask-dev-1  | [FLASK]  * Serving Flask app 'autoapp.py'
+survey-flask-dev-1  | [FLASK]  * Debug mode: on
+survey-flask-dev-1  | [FLASK] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+survey-flask-dev-1  | [FLASK]  * Running on all addresses (0.0.0.0)
+survey-flask-dev-1  | [FLASK]  * Running on http://127.0.0.1:5000
+survey-flask-dev-1  | [FLASK]  * Running on http://172.18.0.2:5000
+survey-flask-dev-1  | [FLASK] [33mPress CTRL+C to quit[0m
+survey-flask-dev-1  | [FLASK]  * Restarting with stat
+survey-flask-dev-1  | [FLASK] [2025-08-08 07:18:01,696] INFO in app: API blueprint registered successfully
+survey-flask-dev-1  | [FLASK]  * Debugger is active!
+survey-flask-dev-1  | [FLASK]  * Debugger PIN: 877-715-502
+survey-flask-dev-1  | [WEBPACK] assets by status 300 KiB [cached] 4 assets
+survey-flask-dev-1  | [WEBPACK] assets by status 2.81 MiB [compared for emit]
+survey-flask-dev-1  | [WEBPACK]   assets by path *.ttf 699 KiB
+survey-flask-dev-1  | [WEBPACK]     asset fa-solid-900.ttf 416 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-brands-400.ttf 206 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-regular-400.ttf 66.5 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-v4compatibility.ttf 10.6 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]   assets by path *.js 1.7 MiB
+survey-flask-dev-1  | [WEBPACK]     asset main_js.bundle.js 1.69 MiB [compared for emit] (name: main_js)
+survey-flask-dev-1  | [WEBPACK]     asset main_css.bundle.js 4.67 KiB [compared for emit] (name: main_css)
+survey-flask-dev-1  | [WEBPACK]   asset main_css.bundle.css 380 KiB [compared for emit] (name: main_css)
+survey-flask-dev-1  | [WEBPACK]   asset favicon.ico 58.2 KiB [compared for emit] [from: assets/img/favicon.ico] (auxiliary name: main_js)
+survey-flask-dev-1  | [WEBPACK] Entrypoint main_js 1.69 MiB (58.2 KiB) = main_js.bundle.js 1 auxiliary asset
+survey-flask-dev-1  | [WEBPACK] Entrypoint main_css 385 KiB (999 KiB) = main_css.bundle.css 380 KiB main_css.bundle.js 4.67 KiB 8 auxiliary assets
+survey-flask-dev-1  | [WEBPACK] orphan modules 1.21 MiB (javascript) 999 KiB (asset) 1.03 KiB (runtime) [orphan] 39 modules
+survey-flask-dev-1  | [WEBPACK] runtime modules 2.83 KiB 14 modules
+survey-flask-dev-1  | [WEBPACK] javascript modules 585 KiB
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/@popperjs/core/lib/ 68.8 KiB 57 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./assets/ 723 bytes 5 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/@fortawesome/fontawesome-free/ 104 KiB 2 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/bootstrap/dist/ 133 KiB 2 modules
+survey-flask-dev-1  | [WEBPACK]   ./node_modules/jquery/dist/jquery.js 279 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] css modules 380 KiB
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./node_modules/@fortawesome/fontawesome-free/css/all.css 105 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./node_modules/bootstrap/dist/css/bootstrap.css 274 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./assets/css/style.css 1.14 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] ./assets/img/favicon.ico 58.2 KiB (asset) 42 bytes (javascript) [optional] [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] webpack 5.99.8 compiled successfully in 1060 ms
+survey-flask-dev-1  | [FLASK] /usr/local/lib/python3.10/site-packages/flask_debugtoolbar/__init__.py:328: UserWarning: Could not insert debug toolbar. </body> tag not found in response.
+survey-flask-dev-1  | [FLASK]   warnings.warn(
+survey-flask-dev-1  | [FLASK] 172.18.0.1 - - [15/Aug/2025 03:07:10] "OPTIONS /check-login/ HTTP/1.1" 200 -
+survey-flask-dev-1  | [FLASK] 172.18.0.1 - - [15/Aug/2025 03:07:11] "[31m[1mGET /check-login/ HTTP/1.1[0m" 403 -
+survey-flask-dev-1  | [FLASK] 172.18.0.1 - - [15/Aug/2025 03:07:12] "OPTIONS /generate-participant-id/ HTTP/1.1" 200 -
+survey-flask-dev-1  | [FLASK] 172.18.0.1 - - [15/Aug/2025 03:07:12] "GET /generate-participant-id/ HTTP/1.1" 200 -
+survey-flask-dev-1  | npm error path /app
+survey-flask-dev-1  | npm error command failed
+survey-flask-dev-1  | npm error signal SIGTERM
+survey-flask-dev-1  | npm error command sh -c run-script-os
+survey-flask-dev-1  | npm error A complete log of this run can be found in: /root/.npm/_logs/2025-08-08T07_18_00_571Z-debug-0.log
+[Ksurvey-flask-dev-1 exited with code 1
+ Container server-survey-flask-prod-1  Creating
+ Container server-survey-flask-prod-1  Created
+Attaching to survey-flask-prod-1
+survey-flask-prod-1  | /usr/local/lib/python3.10/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+survey-flask-prod-1  |   import pkg_resources
+survey-flask-prod-1  | 2025-08-20 21:58:00,662 INFO Included extra file "/etc/supervisor/conf.d/gunicorn.conf" during parsing
+survey-flask-prod-1  | 2025-08-20 21:58:00,664 INFO RPC interface 'supervisor' initialized
+survey-flask-prod-1  | 2025-08-20 21:58:00,664 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+survey-flask-prod-1  | 2025-08-20 21:58:00,664 INFO supervisord started with pid 1
+survey-flask-prod-1  | 2025-08-20 21:58:01,667 INFO spawned: 'gunicorn' with pid 7
+survey-flask-prod-1  | [2025-08-20 21:58:01 +0000] [7] [INFO] Starting gunicorn 23.0.0
+survey-flask-prod-1  | [2025-08-20 21:58:01 +0000] [7] [INFO] Listening at: http://0.0.0.0:5000 (7)
+survey-flask-prod-1  | [2025-08-20 21:58:01 +0000] [7] [INFO] Using worker: gevent
+survey-flask-prod-1  | [2025-08-20 21:58:01 +0000] [8] [INFO] Booting worker with pid: 8
+survey-flask-prod-1  | [2025-08-20 21:58:01 +0000] [9] [INFO] Booting worker with pid: 9
+survey-flask-prod-1  | [2025-08-20 21:58:01 +0000] [10] [INFO] Booting worker with pid: 10
+survey-flask-prod-1  | [2025-08-20 21:58:02 +0000] [11] [INFO] Booting worker with pid: 11
+survey-flask-prod-1  | 2025-08-20 21:58:03,048 INFO success: gunicorn entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+survey-flask-prod-1  | 2025-08-20 22:15:24,495 WARN received SIGTERM indicating exit request
+survey-flask-prod-1  | 2025-08-20 22:15:24,496 INFO waiting for gunicorn to die
+survey-flask-prod-1  | [2025-08-20 22:15:24 +0000] [7] [INFO] Handling signal: term
+survey-flask-prod-1  | [2025-08-20 22:15:24 +0000] [8] [INFO] Worker exiting (pid: 8)
+survey-flask-prod-1  | [2025-08-20 22:15:24 +0000] [9] [INFO] Worker exiting (pid: 9)
+survey-flask-prod-1  | [2025-08-20 22:15:24 +0000] [10] [INFO] Worker exiting (pid: 10)
+survey-flask-prod-1  | [2025-08-20 22:15:24 +0000] [11] [INFO] Worker exiting (pid: 11)
+survey-flask-prod-1  | [2025-08-20 22:15:24 +0000] [7] [INFO] Shutting down: Master
+survey-flask-prod-1  | 2025-08-20 22:15:25,015 INFO stopped: gunicorn (exit status 0)
+[Ksurvey-flask-prod-1 exited with code 0
+ Network server_default  Creating
+ Network server_default  Created
+ Container server-survey-flask-dev-1  Creating
+ Container server-survey-flask-dev-1  Created
+Attaching to survey-flask-dev-1
+survey-flask-dev-1  | 
+survey-flask-dev-1  | > server@1.0.0 start
+survey-flask-dev-1  | > run-script-os
+survey-flask-dev-1  | 
+survey-flask-dev-1  | 
+survey-flask-dev-1  | > server@1.0.0 start:default
+survey-flask-dev-1  | > concurrently -n "WEBPACK,FLASK" -c "bgBlue.bold,bgMagenta.bold" "npm run webpack-watch" "npm run flask-server"
+survey-flask-dev-1  | 
+survey-flask-dev-1  | [FLASK] 
+survey-flask-dev-1  | [FLASK] > server@1.0.0 flask-server
+survey-flask-dev-1  | [FLASK] > flask run --host=0.0.0.0
+survey-flask-dev-1  | [FLASK] 
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] > server@1.0.0 webpack-watch
+survey-flask-dev-1  | [WEBPACK] > run-script-os
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [WEBPACK] > server@1.0.0 webpack-watch:default
+survey-flask-dev-1  | [WEBPACK] > NODE_ENV=debug webpack --mode development --watch
+survey-flask-dev-1  | [WEBPACK] 
+survey-flask-dev-1  | [FLASK] [2025-08-20 22:15:32,974] INFO in app: API blueprint registered successfully
+survey-flask-dev-1  | [FLASK]  * Serving Flask app 'autoapp.py'
+survey-flask-dev-1  | [FLASK]  * Debug mode: on
+survey-flask-dev-1  | [FLASK] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+survey-flask-dev-1  | [FLASK]  * Running on all addresses (0.0.0.0)
+survey-flask-dev-1  | [FLASK]  * Running on http://127.0.0.1:5000
+survey-flask-dev-1  | [FLASK]  * Running on http://172.18.0.2:5000
+survey-flask-dev-1  | [FLASK] [33mPress CTRL+C to quit[0m
+survey-flask-dev-1  | [FLASK]  * Restarting with stat
+survey-flask-dev-1  | [FLASK] [2025-08-20 22:15:33,332] INFO in app: API blueprint registered successfully
+survey-flask-dev-1  | [FLASK]  * Debugger is active!
+survey-flask-dev-1  | [FLASK]  * Debugger PIN: 860-509-873
+survey-flask-dev-1  | [WEBPACK] assets by status 300 KiB [cached] 4 assets
+survey-flask-dev-1  | [WEBPACK] assets by status 2.81 MiB [compared for emit]
+survey-flask-dev-1  | [WEBPACK]   assets by path *.ttf 699 KiB
+survey-flask-dev-1  | [WEBPACK]     asset fa-solid-900.ttf 416 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-brands-400.ttf 206 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-regular-400.ttf 66.5 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]     asset fa-v4compatibility.ttf 10.6 KiB [compared for emit] [from: node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.ttf] (auxiliary name: main_css)
+survey-flask-dev-1  | [WEBPACK]   assets by path *.js 1.7 MiB
+survey-flask-dev-1  | [WEBPACK]     asset main_js.bundle.js 1.69 MiB [compared for emit] (name: main_js)
+survey-flask-dev-1  | [WEBPACK]     asset main_css.bundle.js 4.67 KiB [compared for emit] (name: main_css)
+survey-flask-dev-1  | [WEBPACK]   asset main_css.bundle.css 380 KiB [compared for emit] (name: main_css)
+survey-flask-dev-1  | [WEBPACK]   asset favicon.ico 58.2 KiB [compared for emit] [from: assets/img/favicon.ico] (auxiliary name: main_js)
+survey-flask-dev-1  | [WEBPACK] Entrypoint main_js 1.69 MiB (58.2 KiB) = main_js.bundle.js 1 auxiliary asset
+survey-flask-dev-1  | [WEBPACK] Entrypoint main_css 385 KiB (999 KiB) = main_css.bundle.css 380 KiB main_css.bundle.js 4.67 KiB 8 auxiliary assets
+survey-flask-dev-1  | [WEBPACK] orphan modules 1.21 MiB (javascript) 999 KiB (asset) 1.03 KiB (runtime) [orphan] 39 modules
+survey-flask-dev-1  | [WEBPACK] runtime modules 2.83 KiB 14 modules
+survey-flask-dev-1  | [WEBPACK] javascript modules 585 KiB
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/@popperjs/core/lib/ 68.8 KiB 57 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./assets/ 723 bytes 5 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/@fortawesome/fontawesome-free/ 104 KiB 2 modules
+survey-flask-dev-1  | [WEBPACK]   modules by path ./node_modules/bootstrap/dist/ 133 KiB 2 modules
+survey-flask-dev-1  | [WEBPACK]   ./node_modules/jquery/dist/jquery.js 279 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] css modules 380 KiB
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./node_modules/@fortawesome/fontawesome-free/css/all.css 105 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./node_modules/bootstrap/dist/css/bootstrap.css 274 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK]   css ./node_modules/css-loader/dist/cjs.js!./assets/css/style.css 1.14 KiB [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] ./assets/img/favicon.ico 58.2 KiB (asset) 42 bytes (javascript) [optional] [built] [code generated]
+survey-flask-dev-1  | [WEBPACK] webpack 5.99.8 compiled successfully in 1094 ms
+survey-flask-dev-1  | npm error path /app
+survey-flask-dev-1  | npm error command failed
+survey-flask-dev-1  | npm error signal SIGTERM
+survey-flask-dev-1  | npm error command sh -c run-script-os
+survey-flask-dev-1  | npm notice
+survey-flask-dev-1  | npm notice New major version of npm available! 10.8.2 -> 11.5.2
+survey-flask-dev-1  | npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.5.2
+survey-flask-dev-1  | npm notice To update run: npm install -g npm@11.5.2
+survey-flask-dev-1  | npm notice
+survey-flask-dev-1  | npm error A complete log of this run can be found in: /root/.npm/_logs/2025-08-20T22_15_31_980Z-debug-0.log
+[Ksurvey-flask-dev-1 exited with code 1
+ Container server-survey-flask-prod-1  Creating
+ Container server-survey-flask-prod-1  Created
+Attaching to survey-flask-prod-1
+survey-flask-prod-1  | /usr/local/lib/python3.10/site-packages/supervisor/options.py:13: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+survey-flask-prod-1  |   import pkg_resources
+survey-flask-prod-1  | 2025-08-20 22:17:35,533 INFO Included extra file "/etc/supervisor/conf.d/gunicorn.conf" during parsing
+survey-flask-prod-1  | 2025-08-20 22:17:35,535 INFO RPC interface 'supervisor' initialized
+survey-flask-prod-1  | 2025-08-20 22:17:35,535 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+survey-flask-prod-1  | 2025-08-20 22:17:35,535 INFO supervisord started with pid 1
+survey-flask-prod-1  | 2025-08-20 22:17:36,538 INFO spawned: 'gunicorn' with pid 7
+survey-flask-prod-1  | [2025-08-20 22:17:36 +0000] [7] [INFO] Starting gunicorn 23.0.0
+survey-flask-prod-1  | [2025-08-20 22:17:36 +0000] [7] [INFO] Listening at: http://0.0.0.0:5000 (7)
+survey-flask-prod-1  | [2025-08-20 22:17:36 +0000] [7] [INFO] Using worker: gevent
+survey-flask-prod-1  | [2025-08-20 22:17:36 +0000] [8] [INFO] Booting worker with pid: 8
+survey-flask-prod-1  | [2025-08-20 22:17:36 +0000] [9] [INFO] Booting worker with pid: 9
+survey-flask-prod-1  | [2025-08-20 22:17:36 +0000] [10] [INFO] Booting worker with pid: 10
+survey-flask-prod-1  | [2025-08-20 22:17:36 +0000] [11] [INFO] Booting worker with pid: 11
+survey-flask-prod-1  | 2025-08-20 22:17:37,827 INFO success: gunicorn entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+survey-flask-prod-1  | [2025-08-21 19:22:52,870] WARNING in api: Response time too fast: 0.03s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:22:56,353] WARNING in api: Response time too fast: 0.08s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:22:59,730] WARNING in api: Response time too fast: 0.09s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:23:03,964] WARNING in api: Response time too fast: 0.08s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:23:06,086] WARNING in api: Response time too fast: 0.03s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:23:24,353] WARNING in api: Response time too fast: 0.05s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:23:27,052] WARNING in api: Response time too fast: 0.08s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:23:47,769] WARNING in api: Response time too fast: 0.09s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:23:49,794] WARNING in api: Response time too fast: 0.03s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:23:52,781] WARNING in api: Response time too fast: 0.09s -> 0.1s for user 4268
+survey-flask-prod-1  | [2025-08-21 19:23:55,843] WARNING in api: Response time too fast: 0.06s -> 0.1s for user 4268
+survey-flask-prod-1  | 2025-08-21 21:13:48,787 WARN received SIGTERM indicating exit request
+survey-flask-prod-1  | 2025-08-21 21:13:48,787 INFO waiting for gunicorn to die
+survey-flask-prod-1  | [2025-08-21 21:13:48 +0000] [7] [INFO] Handling signal: term
+survey-flask-prod-1  | [2025-08-21 21:13:49 +0000] [8] [INFO] Worker exiting (pid: 8)
+survey-flask-prod-1  | [2025-08-21 21:13:49 +0000] [10] [INFO] Worker exiting (pid: 10)
+survey-flask-prod-1  | [2025-08-21 21:13:49 +0000] [11] [INFO] Worker exiting (pid: 11)
+survey-flask-prod-1  | [2025-08-21 21:13:49 +0000] [9] [INFO] Worker exiting (pid: 9)
+survey-flask-prod-1  | [2025-08-21 21:13:49 +0000] [7] [INFO] Shutting down: Master
+survey-flask-prod-1  | 2025-08-21 21:13:49,908 INFO stopped: gunicorn (exit status 0)
+[Ksurvey-flask-prod-1 exited with code 0

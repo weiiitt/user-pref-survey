@@ -154,7 +154,7 @@ function InterRoundSurveyPage() {
 
                         {renderScaleQuestion(
                             'frustration_level',
-                            'How discouraged, irritated, stressed, and annoyed were you?',
+                            'How discouraged, irritated, stressed, or annoyed were you?',
                             demandScaleOptions
                         )}
 

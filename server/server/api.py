@@ -343,8 +343,8 @@ def submit_inter_round_survey():
     
     for field in required_scale_fields:
         value = data.get(field)
-        if not isinstance(value, int) or value < 1 or value > 5:
-            return jsonify({"error": f"{field} must be an integer between 1 and 5"}), 400
+        if not isinstance(value, int) or value < 1 or value > 7:
+            return jsonify({"error": f"{field} must be an integer between 1 and 7"}), 400
     
     decision_factors = data.get('decision_factors', '').strip()
     if not decision_factors:
