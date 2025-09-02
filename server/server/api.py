@@ -11,6 +11,22 @@ from server.services.tree_node import NewTreeNode
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
+def compute_all_completed(user: User) -> bool:
+    """Return True if all conditions across all test types are completed and their inter-round surveys are done."""
+    try:
+        structure = get_survey_structure()
+        total_conditions = len(structure.get("tabletop", {})) + len(structure.get("robot_nav", {}))
+        # Count progress rows that are both completed and have their inter-round survey completed
+        completed_with_survey = UserTestProgress.query.filter_by(
+            user_id=user.id,
+            completed=True,
+            inter_round_survey_completed=True,
+        ).count()
+        return completed_with_survey >= total_conditions and total_conditions > 0
+    except Exception as e:
+        current_app.logger.error(f"Error computing all_completed: {e}")
+        return False
+
 class RemapUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
         if module.startswith("numpy._core"):
@@ -310,16 +326,16 @@ def submit_choice():
     if len(choices) >= current_condition_questions:
         progress.completed = True
         
-        # Check if we need to show inter-round survey (not for the final completion)
+        # Check if we need to show inter-round survey (including for the final completion)
         max_tabletop_condition = available_conditions["tabletop"]
         max_robot_nav_condition = available_conditions["robot_nav"]
         
         # Check if this is the final completion using randomized order
         is_final_completion = (user.current_test_type == "robot_nav" and 
                              user.current_condition_index >= len(user.robot_nav_condition_order) - 1)
-        
-        if not is_final_completion:
-            show_inter_round_survey = True
+
+        # Always require inter-round survey, even at final completion
+        show_inter_round_survey = True
         
         # Move to next condition using randomized order
         if user.current_test_type == "tabletop":
@@ -340,12 +356,13 @@ def submit_choice():
                 user.current_condition_index += 1
                 user.current_condition = user.robot_nav_condition_order[user.current_condition_index]
             else:
-                # All tests complete
+                # All tests complete for robot_nav; still require inter-round survey.
+                # Do not advance further; completion is finalized after survey submission.
                 db.session.commit()
                 return jsonify({
-                    "message": "All tests completed!",
-                    "completed": True,
-                    "show_inter_round_survey": False
+                    "message": "Final condition completed. Inter-round survey required.",
+                    "completed": False,
+                    "show_inter_round_survey": True
                 })
     
     db.session.commit()
@@ -425,9 +442,27 @@ def submit_inter_round_survey():
     completed_progress.inter_round_survey_completed = True
     db.session.commit()
     
+    # Determine if this survey completion finishes the entire study
+    all_completed = compute_all_completed(user)
+    
     return jsonify({
         "message": "Inter-round survey completed successfully",
-        "success": True
+        "success": True,
+        "all_completed": all_completed
+    })
+
+@api.route("/check-completion", methods=["GET"])
+@cross_origin(supports_credentials=True)
+@csrf_protect.exempt
+def check_completion():
+    participant_id = session.get('user_id')
+    if not participant_id:
+        return jsonify({"error": "Not logged in"}), 403
+    user = User.query.filter_by(participant_id=participant_id).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify({
+        "all_completed": compute_all_completed(user)
     })
 
 @api.route("/check-pre-activity-survey", methods=["GET"])

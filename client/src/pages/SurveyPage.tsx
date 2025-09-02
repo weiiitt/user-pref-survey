@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchQuestionImages, submitChoice, fetchSurveyConfig, checkPreActivitySurvey } from '../utils/api';
+import { fetchQuestionImages, submitChoice, fetchSurveyConfig, checkPreActivitySurvey, checkCompletion } from '../utils/api';
 import '../styles/SurveyPage.css';
 import Navbar from '../components/Navbar';
 import InstructionsPopup from '../components/InstructionsPopup';
@@ -89,19 +89,24 @@ function SurveyPage() {
 		try {
 			const result = await submitChoice(choice, responseTime);
 			
-			if (result.completed) {
-				// Navigate to thank you page instead of showing alert
-				navigate('/thank-you');
-				return;
-			} else if (result.show_inter_round_survey) {
-				// Navigate to inter-round survey
+			// Always prioritize inter-round survey if flagged
+			if (result.show_inter_round_survey) {
 				navigate('/inter-round-survey');
-			} else {
-				// Wait a moment to show selection, then load next question (which will update progress)
+				return;
+			}
+			
+			// If backend reports completion without flag (shouldn't happen), probe next state via GET
+			if (result.completed) {
 				setTimeout(() => {
 					loadQuestion();
-				}, 1000);
+				}, 500);
+				return;
 			}
+			
+			// Otherwise, load the next question
+			setTimeout(() => {
+				loadQuestion();
+			}, 1000);
 		} catch (error: any) {
 			console.error('Error submitting choice:', error);
 			// Check if it's a user not found or authentication error
@@ -148,6 +153,13 @@ function SurveyPage() {
 				const surveyStatus = await checkPreActivitySurvey();
 				if (!surveyStatus.completed) {
 					navigate('/pre-activity');
+					return;
+				}
+				
+				// If the entire study is completed, go directly to Thank You
+				const completion = await checkCompletion();
+				if (completion.all_completed) {
+					navigate('/thank-you');
 					return;
 				}
 				

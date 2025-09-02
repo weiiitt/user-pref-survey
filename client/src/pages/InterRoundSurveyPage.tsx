@@ -52,8 +52,12 @@ function InterRoundSurveyPage() {
 
         setIsSubmitting(true);
         try {
-            await submitInterRoundSurvey(responses);
-            navigate('/survey');
+            const result = await submitInterRoundSurvey(responses);
+            if (result.all_completed) {
+                navigate('/thank-you');
+            } else {
+                navigate('/survey');
+            }
         } catch (error) {
             console.error('Error submitting survey:', error);
             setError('Failed to submit survey. Please try again.');

@@ -250,9 +250,9 @@ export const submitInterRoundSurvey = async (responses: {
   difference_clarity: number;
   preference_learning: number;
   decision_factors: string;
-}): Promise<{ message: string; success: boolean }> => {
+}): Promise<{ message: string; success: boolean; all_completed?: boolean }> => {
   try {
-    const response = await axios.post<{ message: string; success: boolean }>(
+    const response = await axios.post<{ message: string; success: boolean; all_completed?: boolean }>(
       `${API_URL}/api/submit-inter-round-survey`,
       responses,
       { withCredentials: true }
@@ -261,6 +261,23 @@ export const submitInterRoundSurvey = async (responses: {
   } catch (error) {
     console.error('[api.ts] submitInterRoundSurvey: Error submitting inter-round survey:', error);
     throw error;
+  }
+};
+
+/**
+ * Checks if the user has completed all conditions and surveys
+ */
+export const checkCompletion = async (): Promise<{ all_completed: boolean }> => {
+  try {
+    const response = await axios.get<{ all_completed: boolean }>(
+      `${API_URL}/api/check-completion`,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[api.ts] checkCompletion: Error checking completion status:', error);
+    // Treat errors as not completed to avoid false positives
+    return { all_completed: false };
   }
 };
 
