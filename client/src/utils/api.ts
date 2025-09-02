@@ -41,6 +41,7 @@ interface QuestionImagesResponse {
   test_type: string;
   condition: number;
   question_num: number;
+  time_taken?: number[];
   current_progress?: number;
   error?: string;
   show_inter_round_survey?: boolean;

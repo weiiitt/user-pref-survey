@@ -11,6 +11,7 @@ interface QuestionData {
 	test_type: string;
 	condition: number;
 	question_num: number;
+	time_taken?: number[];
 }
 
 function SurveyPage() {
@@ -64,12 +65,16 @@ function SurveyPage() {
 				setPausedTime(0);
 			}
 		
-						setSelectedChoice(null);
+			setSelectedChoice(null);
 
 			
 		} catch (error: any) {
 			console.error('Error loading question:', error);
 			// Do not redirect on errors; show inline error state
+			if (error.response?.status === 202) {
+                // Inter-round survey pending
+                navigate('/inter-round-survey');
+            }
 			setLoadError(true);
 		}
 	};
@@ -263,14 +268,14 @@ function SurveyPage() {
 									onClick={() => handleChoiceSelect(0)}
 								>
 									<img src={questionData.image1} alt="Route Option 1" />
-									<div className="image-label">Option 1</div>
+									<div className="image-label">{`Option 1${questionData.time_taken && questionData.time_taken.length > 0 ? `: ${questionData.time_taken[0].toFixed(1)}s` : ''}`}</div>
 								</div>
 								<div 
 									className={`image-container ${selectedChoice === 1 ? 'selected' : ''}`}
 									onClick={() => handleChoiceSelect(1)}
 								>
 									<img src={questionData.image2} alt="Route Option 2" />
-									<div className="image-label">Option 2</div>
+									<div className="image-label">{`Option 2${questionData.time_taken && questionData.time_taken.length > 1 ? `: ${questionData.time_taken[1].toFixed(1)}s` : ''}`}</div>
 								</div>
 							</div>
 						)}

@@ -1,5 +1,6 @@
 import seaborn as sns
 import pandas as pd
+import matplotlib.pyplot as plt
 import pickle
 import sys
 sys.path.append('../')
@@ -71,7 +72,21 @@ def create_survey_plots(test_type: str, user_choices: list[list[list[int]]], con
             r_values.append(r)
         correlations["correlations"].append(r_values)
     
-    return pd.DataFrame(correlations)
+    correlations = pd.DataFrame(correlations)
+    
+    sns.set_theme(style="whitegrid")
+    ax = sns.boxplot(
+        x='condition',
+        y='correlations',
+        data=correlations.explode('correlations'),
+        palette='Set2'
+    )
+    ax.set_title(f'Distribution of Correlations by Condition ({test_type})')
+    ax.set_xlabel('Condition')
+    ax.set_ylabel('Correlation')
+    plt.tight_layout()
+    plt.savefig(f'correlation_boxplot_{test_type}.png')
+    plt.close()
     
     
 

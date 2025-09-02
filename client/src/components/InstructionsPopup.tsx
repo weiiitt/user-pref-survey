@@ -28,7 +28,7 @@ export default function InstructionsPopup({ isVisible, onClose, testType }: Inst
 						</div>
 					) : (
 						<div>
-							<p>For this task you will be deciding the best path for a food delivery robot. You'll see two trajectory options - choose your preferred one.</p>
+							<p>For this task you will be deciding the best path for a food delivery robot. You'll see two trajectory options and the time taken to traverse each option - choose your preferred one.</p>
 							<p>Your goal is to teach the robot to reach its destination quickly. Crossing main roads (asphalt) may take more time and be riskier due to cars, while some surfaces (like grass) might be slower or bumpier. We will assume the robot can safely and quickly navigate through the other surfaces.</p>
 							<p>These are the surfaces the robot might encounter:</p>
 							<div className="material-grid">

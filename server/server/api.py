@@ -5,8 +5,17 @@ from server.database import db
 from server.extensions import csrf_protect
 import os
 import base64
+import pickle
+import numpy as np
+from server.services.tree_node import NewTreeNode
 
 api = Blueprint("api", __name__, url_prefix="/api")
+
+class RemapUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module.startswith("numpy._core"):
+            module = module.replace("numpy._core", "numpy.core", 1)
+        return super().find_class(module, name)
 
 def get_survey_structure():
     """
@@ -172,14 +181,19 @@ def get_question_images():
     if test_type == "tabletop":
         folder_name = f"TableTop-v{condition}"
         base_filename = f"TableTop-v{condition}_query_{question_num}_{choices_str}_"
+        # pkl_filename = f"query_tree_TableTop-v{condition}.pkl"
     else:  # robot_nav
         folder_name = f"GrassStreetNav-v{condition}"  # Assuming similar naming pattern
         base_filename = f"GrassStreetNav-v{condition}_query_{question_num}_{choices_str}_"
+        pkl_filename = f"query_tree_GrassStreetNav-v{condition}.pkl"
     
     # Construct full paths (assets are at /app/assets in Docker container)
     assets_path = os.path.join("/app", "assets", "user_study", folder_name)
     image1_path = os.path.join(assets_path, base_filename + "1.png")
     image2_path = os.path.join(assets_path, base_filename + "2.png")
+    
+    if test_type == "robot_nav":
+        pkl_path = os.path.join(assets_path, pkl_filename)
     
     current_app.logger.info(f"Looking for images at:")
     current_app.logger.info(f"  Image1: {image1_path}")
@@ -192,6 +206,22 @@ def get_question_images():
     if not os.path.exists(image1_path) or not os.path.exists(image2_path):
         return jsonify({"error": "Images not found for current progress"}), 404
     
+    if test_type == "robot_nav" and not os.path.exists(pkl_path):
+        return jsonify({"error": "PKL file not found for current progress"}), 404
+    
+    if test_type == "robot_nav":
+        with open(pkl_path, "rb") as pkl_file:
+            query_tree = RemapUnpickler(pkl_file).load()
+        
+        # get the time taken for the options
+        for choice in choices_str:
+            if choice == '0':
+                query_tree = query_tree.children[0]
+            else:
+                query_tree = query_tree.children[1]
+        
+        features_matrix = query_tree.query_summary['features_matrix']
+        
     # Read and encode images as base64
     with open(image1_path, "rb") as img1_file:
         image1_data = base64.b64encode(img1_file.read()).decode('utf-8')
@@ -199,13 +229,24 @@ def get_question_images():
     with open(image2_path, "rb") as img2_file:
         image2_data = base64.b64encode(img2_file.read()).decode('utf-8')
     
-    return jsonify({
-        "image1": f"data:image/png;base64,{image1_data}",
-        "image2": f"data:image/png;base64,{image2_data}",
-        "test_type": test_type,
-        "condition": user.current_condition_index,
-        "question_num": question_num,
-    })
+
+    if test_type == "robot_nav":  
+        return jsonify({
+            "image1": f"data:image/png;base64,{image1_data}",
+            "image2": f"data:image/png;base64,{image2_data}",
+            "test_type": test_type,
+            "condition": user.current_condition_index,
+            "question_num": question_num,
+            "time_taken": [features_matrix[0][0], features_matrix[1][0]]
+        })
+    else:
+        return jsonify({
+            "image1": f"data:image/png;base64,{image1_data}",
+            "image2": f"data:image/png;base64,{image2_data}",
+            "test_type": test_type,
+            "condition": user.current_condition_index,
+            "question_num": question_num
+        })
 
 @api.route("/submit-choice", methods=["POST"])
 @cross_origin(supports_credentials=True)
