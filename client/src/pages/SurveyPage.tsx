@@ -18,6 +18,7 @@ function SurveyPage() {
 	const [questionData, setQuestionData] = useState<QuestionData | null>(null);
 	const [selectedChoice, setSelectedChoice] = useState<number | null>(null);
 	const [progress, setProgress] = useState(0);
+	const [loadError, setLoadError] = useState(false);
 
 	const [showInstructions, setShowInstructions] = useState(false);
 	const [questionStartTime, setQuestionStartTime] = useState<number | null>(null);
@@ -31,6 +32,7 @@ function SurveyPage() {
 
 	const loadQuestion = async () => {
 		try {
+			setLoadError(false);
 			const data = await fetchQuestionImages();
 			
 			// Check if there's a pending inter-round survey
@@ -67,13 +69,8 @@ function SurveyPage() {
 			
 		} catch (error: any) {
 			console.error('Error loading question:', error);
-			// Check if it's a user not found or authentication error
-			if (error.response?.status === 404 || error.response?.status === 401) {
-				navigate('/');
-			} else if (error.response?.status === 202) {
-				// Inter-round survey pending
-				navigate('/inter-round-survey');
-			}
+			// Do not redirect on errors; show inline error state
+			setLoadError(true);
 		}
 	};
 
@@ -224,7 +221,14 @@ function SurveyPage() {
 	return (
 		<div className="survey-container">
 			{!questionData ? (
-				<div>Loading...</div>
+				loadError ? (
+					<div className="question-content">
+						<h2>Couldn’t load options</h2>
+						<p>Try refreshing the page. If this problem persists, contact Yi Shiuan using the contact info on the landing page.</p>
+					</div>
+				) : (
+					<div>Loading...</div>
+				)
 			) : (
 				<>
 					<Navbar onShowInstructions={handleShowInstructions} timer={questionStartTime !== null && !showInstructions ? currentTime : null} onPause={handlePause} isPaused={isPaused} />
@@ -247,22 +251,29 @@ function SurveyPage() {
 						<h2>Question {questionData.question_num + 1}</h2>
 						<p>Click on an image to select your preferred trajectory</p>
 						
-						<div className={`images-section ${selectedChoice !== null ? 'processing' : ''} ${isPaused ? 'paused' : ''}`}>
-							<div 
-								className={`image-container ${selectedChoice === 0 ? 'selected' : ''}`}
-								onClick={() => handleChoiceSelect(0)}
-							>
-								<img src={questionData.image1} alt="Route Option 1" />
-								<div className="image-label">Option 1</div>
+						{loadError ? (
+							<div>
+								<h3>Couldn’t load options</h3>
+								<p>Try refreshing the page. If this problem persists, contact Yi Shiuan using the contact info on the landing page.</p>
 							</div>
-							<div 
-								className={`image-container ${selectedChoice === 1 ? 'selected' : ''}`}
-								onClick={() => handleChoiceSelect(1)}
-							>
-								<img src={questionData.image2} alt="Route Option 2" />
-								<div className="image-label">Option 2</div>
+						) : (
+							<div className={`images-section ${selectedChoice !== null ? 'processing' : ''} ${isPaused ? 'paused' : ''}`}>
+								<div 
+									className={`image-container ${selectedChoice === 0 ? 'selected' : ''}`}
+									onClick={() => handleChoiceSelect(0)}
+								>
+									<img src={questionData.image1} alt="Route Option 1" />
+									<div className="image-label">Option 1</div>
+								</div>
+								<div 
+									className={`image-container ${selectedChoice === 1 ? 'selected' : ''}`}
+									onClick={() => handleChoiceSelect(1)}
+								>
+									<img src={questionData.image2} alt="Route Option 2" />
+									<div className="image-label">Option 2</div>
+								</div>
 							</div>
-						</div>
+						)}
 					</div>
 					<InstructionsPopup 
 						isVisible={showInstructions}
