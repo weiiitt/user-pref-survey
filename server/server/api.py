@@ -15,6 +15,10 @@ class RemapUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
         if module.startswith("numpy._core"):
             module = module.replace("numpy._core", "numpy.core", 1)
+        # Remap pickles saved when NewTreeNode lived in __main__ or a local tree_node module
+        if name == "NewTreeNode" and module in ("__main__", "tree_node"):
+            module = "server.services.tree_node"
+            name = "NewTreeNode"
         return super().find_class(module, name)
 
 def get_survey_structure():
