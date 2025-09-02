@@ -280,14 +280,14 @@ function SurveyPage() {
 									onClick={() => handleChoiceSelect(0)}
 								>
 									<img src={questionData.image1} alt="Route Option 1" />
-									<div className="image-label">{`Option 1${questionData.time_taken && questionData.time_taken.length > 0 ? `: ${questionData.time_taken[0].toFixed(1)}s` : ''}`}</div>
+									<div className="image-label">{`Option 1${questionData.time_taken && questionData.time_taken.length > 0 ? `: Takes ${questionData.time_taken[0].toFixed(1)} seconds to traverse` : ''}`}</div>
 								</div>
 								<div 
 									className={`image-container ${selectedChoice === 1 ? 'selected' : ''}`}
 									onClick={() => handleChoiceSelect(1)}
 								>
 									<img src={questionData.image2} alt="Route Option 2" />
-									<div className="image-label">{`Option 2${questionData.time_taken && questionData.time_taken.length > 1 ? `: ${questionData.time_taken[1].toFixed(1)}s` : ''}`}</div>
+									<div className="image-label">{`Option 2${questionData.time_taken && questionData.time_taken.length > 1 ? `: Takes ${questionData.time_taken[1].toFixed(1)} seconds to traverse` : ''}`}</div>
 								</div>
 							</div>
 						)}
