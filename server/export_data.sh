@@ -1,7 +1,35 @@
-docker compose exec -T -u root survey-flask-prod sqlite3 /tmp/dev.db <<EOF
+#!/bin/bash
+
+# Set default export filename and environment
+EXPORT_FILE="survey_export.csv"
+ENVIRONMENT="prod"
+
+# Parse command line arguments
+while getopts "o:e:" opt; do
+  case $opt in
+    o)
+      EXPORT_FILE="$OPTARG"
+      ;;
+    e)
+      ENVIRONMENT="$OPTARG"
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
+
+# Validate environment
+if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
+  echo "Invalid environment: $ENVIRONMENT. Must be 'prod' or 'dev'" >&2
+  exit 1
+fi
+
+docker compose exec -T -u root survey-flask-$ENVIRONMENT sqlite3 /tmp/dev.db <<EOF
 .headers on
 .mode csv
-.output /app/survey_export.csv
+.output /app/${EXPORT_FILE}
 SELECT
   u.id              AS user_id,
   u.participant_id,
@@ -28,4 +56,4 @@ LEFT JOIN inter_round_survey_responses ir
 .quit
 EOF
 
-echo "Data exported to survey_export.csv"
+echo "Data exported to ${EXPORT_FILE} from ${ENVIRONMENT} environment"
