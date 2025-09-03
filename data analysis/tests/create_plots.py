@@ -79,12 +79,12 @@ def create_metric_boxplots_from_csv(
     for test in tests_to_plot:
         sub = df[df['test_type'] == test]
         if sub.empty:
-            continue
+            raise ValueError(f"No rows for test: {test}")
 
         for label_name, col_name in metrics:
             # Guard for missing columns
             if col_name not in sub.columns:
-                continue
+                raise ValueError(f"Column {col_name} not found in {sub.columns}")
             
             plt.figure(figsize=(8, 6))
             ax = sns.boxplot(
@@ -154,7 +154,7 @@ def create_survey_plots(data: pd.DataFrame, condition_labels: List[str], outdir:
     for test in tests_to_plot:
         sub = df[df['test_type'] == test]
         if sub.empty:
-            continue
+            raise ValueError(f"No rows for test: {test}")
         
         if test == "robot_nav":
             test_name = "GrassStreetNav"
@@ -183,15 +183,17 @@ def create_survey_plots(data: pd.DataFrame, condition_labels: List[str], outdir:
             try:
                 choices = ast.literal_eval(choices_str)
             except Exception:
-                continue
+                raise ValueError(f"Invalid choices string: {choices_str}")
             if not isinstance(choices, list):
-                continue
+                raise ValueError(f"Invalid choices type: {type(choices)}")
             if len(choices) < 5:
-                continue
+                raise ValueError(f"Invalid choices length: {len(choices)}")
 
             final_node = trees_by_condition[cond]
             for idx, choice in enumerate(choices):
-                if idx > 4:
+                if test == "robot_nav" and idx > 5:
+                    break
+                if test == "tabletop" and idx > 4:
                     break
                 try:
                     final_node = final_node.children[choice]
@@ -199,7 +201,7 @@ def create_survey_plots(data: pd.DataFrame, condition_labels: List[str], outdir:
                     final_node = None
                     break
             if final_node is None:
-                continue
+                raise ValueError(f"Invalid final node: {final_node}")
 
             r, _ = get_estimated_rewards(final_node, true_weights, feature_bounds)
             rows.append({
@@ -208,7 +210,7 @@ def create_survey_plots(data: pd.DataFrame, condition_labels: List[str], outdir:
             })
 
         if not rows:
-            continue
+            raise ValueError(f"No rows for test: {test_name}")
 
         plot_df = pd.DataFrame(rows)
         plt.figure(figsize=(8, 6))
