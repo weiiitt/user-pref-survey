@@ -60,3 +60,5 @@ env/
 cache/
 
 assets/user_study/
+
+*.csv

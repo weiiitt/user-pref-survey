@@ -1,2 +1,5 @@
 **/cache/
 migrations/
+
+.env
+plots/

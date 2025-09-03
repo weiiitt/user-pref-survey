@@ -21,25 +21,10 @@
     flex-direction: column;
 }
 
-.accordion-button {
-    padding-left: 0;
-    padding-right: 0;
-    font-size: 2rem;
-    font-weight: 600;
-}
-
-.accordion-body {
+.section-content {
+    padding-left: 20px;
     border-left: 2px solid var(--container-color);
 }
-
-.accordion-button:focus {
-    border: none;
-    box-shadow: none;
-}
-
-/* .accordion-button::after {
-    filter: brightness(0) invert(1);
-} */
 
 .start-button {
     background-color: var(--button-color);

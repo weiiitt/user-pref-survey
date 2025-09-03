@@ -266,7 +266,7 @@ function SurveyPage() {
 					{/* Question Content */}
 					<div className="question-content">
 						<h2>Question {questionData.question_num + 1}</h2>
-						<p>Click on an image to select your preferred trajectory</p>
+						<p>Click on an image to select your preferred trajectory. {questionData.test_type === "robot_nav" ? "Assume there could be vehicle traffic on all asphalt surfaces." : ""}</p>
 						
 						{loadError ? (
 							<div>
