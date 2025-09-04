@@ -182,10 +182,20 @@ def get_inter_round_questions():
         {"id": "preference_learning", "type": "scale", "label": "Through these questions, the robot was able to learn my preferences."},
     ]
 
-    # Decoy question (same anchors and scale to avoid being obvious)
-    decoy_expected = random.randint(1, 7)
+    # Decoy question (camouflaged sentence variant + ordinal wording)
+    decoy_expected = random.randint(3, 7)
     session['attention_check_expected'] = decoy_expected
-    decoy_question = {"id": "attention_check", "type": "scale", "label": f"Please select option {decoy_expected}."}
+    suffix = 'st' if decoy_expected == 1 else 'nd' if decoy_expected == 2 else 'rd' if decoy_expected == 3 else 'th'
+    ordinal = f"{decoy_expected}{suffix}"
+    decoy_variants = [
+        f"It was easy to consider the options and select the {ordinal} option in this question.",
+        f"It was simple to compare the options and pick the {ordinal} option in this question.",
+        f"It was straightforward to assess the options and choose the {ordinal} option in this question.",
+        f"It was easy to review the options and select the {ordinal} option in this question.",
+        f"It was simple to judge the options and choose the {ordinal} option in this question.",
+    ]
+    decoy_label = random.choice(decoy_variants)
+    decoy_question = {"id": "attention_check", "type": "scale", "label": decoy_label}
 
     # Randomly insert decoy among the scale questions
     insert_idx = random.randint(0, len(scale_questions))
