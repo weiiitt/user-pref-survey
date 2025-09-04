@@ -55,6 +55,21 @@ interface SubmitChoiceResponse {
   show_inter_round_survey?: boolean;
 }
 
+export interface InterRoundQuestion {
+  id: string;
+  type: 'scale' | 'text';
+  label: string;
+  hint?: string;
+}
+
+export interface InterRoundQuestionsResponse {
+  questions: InterRoundQuestion[];
+  scale: { minValue: number; maxValue: number; minLabel: string; maxLabel: string };
+  test_type: string;
+  condition_number: number;
+  is_final_for_test_type: boolean;
+}
+
 /**
  * Fetches two random walking routes from the server
  * @returns Promise containing two random routes
@@ -238,19 +253,29 @@ export const submitChoice = async (choice: number, response_time: number): Promi
 };
 
 /**
+ * Fetch inter-round survey questions and scale meta
+ */
+export const fetchInterRoundQuestions = async (): Promise<InterRoundQuestionsResponse> => {
+  try {
+    const response = await axios.get<InterRoundQuestionsResponse>(
+      `${API_URL}/api/get-inter-round-questions`,
+      { withCredentials: true }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('[api.ts] fetchInterRoundQuestions: Error fetching inter-round questions:', error);
+    throw error;
+  }
+};
+
+/**
  * Submits inter-round survey with responses
  * @param responses - Survey response data
  * @returns Promise containing submission result
  */
-export const submitInterRoundSurvey = async (responses: {
-  mental_demand: number;
-  success_level: number;
-  frustration_level: number;
-  trajectory_choice_ease: number;
-  difference_clarity: number;
-  preference_learning: number;
-  decision_factors: string;
-}): Promise<{ message: string; success: boolean; all_completed?: boolean }> => {
+export const submitInterRoundSurvey = async (
+  responses: Record<string, number | string>
+): Promise<{ message: string; success: boolean; all_completed?: boolean }> => {
   try {
     const response = await axios.post<{ message: string; success: boolean; all_completed?: boolean }>(
       `${API_URL}/api/submit-inter-round-survey`,
@@ -348,4 +373,3 @@ export const submitPreActivitySurvey = async (age: number, sex: string): Promise
 export const generateParticipantId = (): string => {
   return Math.floor(Math.random() * 10000).toString().padStart(4, '0');
 };
-

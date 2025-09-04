@@ -110,6 +110,8 @@ class InterRoundSurveyResponse(PkModel):
     trajectory_choice_ease = Column(db.Integer, nullable=False)  # It was easy to choose between the trajectories the robot showed me
     difference_clarity = Column(db.Integer, nullable=False)  # It was easy to tell the difference between the options presented
     preference_learning = Column(db.Integer, nullable=False)  # Through these questions, the robot was able to learn my preferences
+    # Attention check / decoy (stored as 0 if failed, 1 if passed)
+    attention_check_pass = Column(db.Integer, nullable=False, default=0)
     
     # Free response
     decision_factors = Column(db.Text, nullable=False)  # What factors did you consider when choosing between the two robot trajectories?

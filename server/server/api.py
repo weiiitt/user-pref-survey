@@ -8,6 +8,7 @@ import base64
 import pickle
 import numpy as np
 from server.services.tree_node import NewTreeNode
+import random
 
 api = Blueprint("api", __name__, url_prefix="/api")
 
@@ -132,6 +133,79 @@ def get_survey_config():
         "structure": structure
     })
 
+
+@api.route("/get-inter-round-questions", methods=["GET"])
+@cross_origin(supports_credentials=True)
+@csrf_protect.exempt
+def get_inter_round_questions():
+    """Return the inter-round survey questions with a randomly placed decoy.
+    The free-text question is only included if the completed condition was the last in its test type.
+    """
+    participant_id = session.get('user_id')
+    if not participant_id:
+        return jsonify({"error": "Not logged in"}), 403
+
+    user = User.query.filter_by(participant_id=participant_id).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Find the most recently completed progress that doesn't have survey completed
+    completed_progress = UserTestProgress.query.filter_by(
+        user_id=user.id,
+        completed=True,
+        inter_round_survey_completed=False
+    ).order_by(UserTestProgress.id.desc()).first()
+
+    if not completed_progress:
+        return jsonify({"error": "No pending inter-round survey found"}), 400
+
+    # Determine if the completed condition was the final one for its test type
+    if completed_progress.test_type == "tabletop":
+        order = user.tabletop_condition_order or []
+    else:
+        order = user.robot_nav_condition_order or []
+
+    try:
+        condition_index_in_order = order.index(completed_progress.condition_number)
+        is_final_for_test_type = (condition_index_in_order == len(order) - 1)
+    except ValueError:
+        # If condition not found in order, default to not final
+        is_final_for_test_type = False
+
+    # Base scale questions (1-7)
+    scale_questions = [
+        {"id": "mental_demand", "type": "scale", "label": "How mentally demanding was the task?"},
+        {"id": "success_level", "type": "scale", "label": "How successful were you in accomplishing what you were asked to do?"},
+        {"id": "frustration_level", "type": "scale", "label": "How discouraged, irritated, stressed, or annoyed were you?"},
+        {"id": "trajectory_choice_ease", "type": "scale", "label": "It was easy to choose between the trajectories the robot showed me."},
+        {"id": "difference_clarity", "type": "scale", "label": "It was easy to tell the difference between the options presented."},
+        {"id": "preference_learning", "type": "scale", "label": "Through these questions, the robot was able to learn my preferences."},
+    ]
+
+    # Decoy question (same anchors and scale to avoid being obvious)
+    decoy_question = {"id": "attention_check", "type": "scale", "label": "Please select option 3."}
+
+    # Randomly insert decoy among the scale questions
+    insert_idx = random.randint(0, len(scale_questions))
+    questions = scale_questions.copy()
+    questions.insert(insert_idx, decoy_question)
+
+    # Append free-text only if final for this test type
+    if is_final_for_test_type:
+        questions.append({
+            "id": "decision_factors",
+            "type": "text",
+            "label": "What factors did you consider when choosing between the two robot trajectories?",
+            "hint": "For example: safety, efficiency, terrain type, object avoidance, or other criteria.",
+        })
+
+    return jsonify({
+        "questions": questions,
+        "scale": {"minValue": 1, "maxValue": 7, "minLabel": "Not at all", "maxLabel": "Extremely"},
+        "test_type": completed_progress.test_type,
+        "condition_number": completed_progress.condition_number,
+        "is_final_for_test_type": is_final_for_test_type,
+    })
 
 @api.route("/get-question-images", methods=["GET"])
 @cross_origin(supports_credentials=True)
@@ -397,19 +471,30 @@ def submit_inter_round_survey():
     if not completed_progress:
         return jsonify({"error": "No pending inter-round survey found"}), 400
     
-    # Validate survey data
+    # Determine if the completed condition was the final one for its test type
+    if completed_progress.test_type == "tabletop":
+        order = user.tabletop_condition_order or []
+    else:
+        order = user.robot_nav_condition_order or []
+    try:
+        idx_in_order = order.index(completed_progress.condition_number)
+        is_final_for_test_type = (idx_in_order == len(order) - 1)
+    except ValueError:
+        is_final_for_test_type = False
+
+    # Validate required scale fields (1-7)
     required_scale_fields = [
         'mental_demand', 'success_level', 'frustration_level', 
-        'trajectory_choice_ease', 'difference_clarity', 'preference_learning'
+        'trajectory_choice_ease', 'difference_clarity', 'preference_learning', 'attention_check'
     ]
-    
     for field in required_scale_fields:
         value = data.get(field)
         if not isinstance(value, int) or value < 1 or value > 7:
             return jsonify({"error": f"{field} must be an integer between 1 and 7"}), 400
-    
-    decision_factors = data.get('decision_factors', '').strip()
-    if not decision_factors:
+
+    # Free-text required only if this was the final condition for its test type
+    decision_factors = (data.get('decision_factors') or '').strip()
+    if is_final_for_test_type and not decision_factors:
         return jsonify({"error": "Decision factors response is required"}), 400
     
     # Check if survey response already exists (shouldn't happen, but safety check)
@@ -423,6 +508,10 @@ def submit_inter_round_survey():
         return jsonify({"error": "Survey response already exists for this condition"}), 400
     
     # Create survey response
+    # Compute attention check pass (1 if value == 3 else 0)
+    attention_check_value = data['attention_check']
+    attention_check_pass = 1 if attention_check_value == 3 else 0
+
     survey_response = InterRoundSurveyResponse(
         user_id=user.id,
         test_type=completed_progress.test_type,
@@ -433,7 +522,8 @@ def submit_inter_round_survey():
         trajectory_choice_ease=data['trajectory_choice_ease'],
         difference_clarity=data['difference_clarity'],
         preference_learning=data['preference_learning'],
-        decision_factors=decision_factors
+        attention_check_pass=attention_check_pass,
+        decision_factors=decision_factors if is_final_for_test_type else ""
     )
     
     db.session.add(survey_response)

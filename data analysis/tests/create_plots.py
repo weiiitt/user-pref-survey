@@ -94,6 +94,18 @@ def create_metric_boxplots_from_csv(
                 data=sub,
                 palette='Set2'
             )
+            sns.pointplot(
+                x='condition',
+                y=col_name,
+                data=sub,
+                estimator=np.median,
+                errorbar=None,
+                color='black',
+                markers='D',
+                linestyles='', 
+                dodge=False,
+                markersize=1.5
+            )
             # Hide redundant legend when hue==x
             if ax.get_legend() is not None:
                 ax.get_legend().remove()
@@ -220,6 +232,18 @@ def create_survey_plots(data: pd.DataFrame, condition_labels: List[str], outdir:
             hue='condition',
             data=plot_df,
             palette='Set2'
+        )
+        sns.pointplot(
+            x='condition',
+            y='correlation',
+            data=plot_df,
+            estimator=np.median,
+            errorbar=None,
+            color='black',
+            markers='D',
+            linestyles='', 
+            dodge=False,
+            markersize=1.5
         )
         if ax.get_legend() is not None:
             ax.get_legend().remove()
