@@ -183,7 +183,9 @@ def get_inter_round_questions():
     ]
 
     # Decoy question (same anchors and scale to avoid being obvious)
-    decoy_question = {"id": "attention_check", "type": "scale", "label": "Please select option 3."}
+    decoy_expected = random.randint(1, 7)
+    session['attention_check_expected'] = decoy_expected
+    decoy_question = {"id": "attention_check", "type": "scale", "label": f"Please select option {decoy_expected}."}
 
     # Randomly insert decoy among the scale questions
     insert_idx = random.randint(0, len(scale_questions))
@@ -199,13 +201,17 @@ def get_inter_round_questions():
             "hint": "For example: safety, efficiency, terrain type, object avoidance, or other criteria.",
         })
 
-    return jsonify({
+    response = jsonify({
         "questions": questions,
         "scale": {"minValue": 1, "maxValue": 7, "minLabel": "Not at all", "maxLabel": "Extremely"},
         "test_type": completed_progress.test_type,
         "condition_number": completed_progress.condition_number,
         "is_final_for_test_type": is_final_for_test_type,
     })
+    # Prevent caching to avoid repeated position/value due to caching layers
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
 
 @api.route("/get-question-images", methods=["GET"])
 @cross_origin(supports_credentials=True)
@@ -395,18 +401,18 @@ def submit_choice():
     structure = get_survey_structure()
     current_condition_questions = structure[user.current_test_type][user.current_condition]
     show_inter_round_survey = False
-    available_conditions = get_available_conditions()
+    # available_conditions = get_available_conditions()
     
     if len(choices) >= current_condition_questions:
         progress.completed = True
         
         # Check if we need to show inter-round survey (including for the final completion)
-        max_tabletop_condition = available_conditions["tabletop"]
-        max_robot_nav_condition = available_conditions["robot_nav"]
+        # max_tabletop_condition = available_conditions["tabletop"]
+        # max_robot_nav_condition = available_conditions["robot_nav"]
         
         # Check if this is the final completion using randomized order
-        is_final_completion = (user.current_test_type == "robot_nav" and 
-                             user.current_condition_index >= len(user.robot_nav_condition_order) - 1)
+        # is_final_completion = (user.current_test_type == "robot_nav" and 
+        #                      user.current_condition_index >= len(user.robot_nav_condition_order) - 1)
 
         # Always require inter-round survey, even at final completion
         show_inter_round_survey = True
@@ -510,7 +516,8 @@ def submit_inter_round_survey():
     # Create survey response
     # Compute attention check pass (1 if value == 3 else 0)
     attention_check_value = data['attention_check']
-    attention_check_pass = 1 if attention_check_value == 3 else 0
+    expected = session.get('attention_check_expected', 3)
+    attention_check_pass = 1 if attention_check_value == expected else 0
 
     survey_response = InterRoundSurveyResponse(
         user_id=user.id,
