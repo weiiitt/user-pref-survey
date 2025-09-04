@@ -183,7 +183,7 @@ def get_inter_round_questions():
     ]
 
     # Decoy question (camouflaged sentence variant + ordinal wording)
-    decoy_expected = random.randint(3, 7)
+    decoy_expected = random.randint(1, 7)
     session['attention_check_expected'] = decoy_expected
     suffix = 'st' if decoy_expected == 1 else 'nd' if decoy_expected == 2 else 'rd' if decoy_expected == 3 else 'th'
     ordinal = f"{decoy_expected}{suffix}"
@@ -198,7 +198,7 @@ def get_inter_round_questions():
     decoy_question = {"id": "attention_check", "type": "scale", "label": decoy_label}
 
     # Randomly insert decoy among the scale questions
-    insert_idx = random.randint(0, len(scale_questions))
+    insert_idx = random.randint(3, len(scale_questions))
     questions = scale_questions.copy()
     questions.insert(insert_idx, decoy_question)
 
