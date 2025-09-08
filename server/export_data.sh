@@ -3,18 +3,25 @@
 # Set default export filename and environment
 EXPORT_FILE="survey_export.csv"
 ENVIRONMENT="prod"
+AFTER_DATE=""
 
 # Parse command line arguments
-while getopts "o:e:" opt; do
-  case $opt in
-    o)
-      EXPORT_FILE="$OPTARG"
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -o)
+      EXPORT_FILE="$2"
+      shift 2
       ;;
-    e)
-      ENVIRONMENT="$OPTARG"
+    -e)
+      ENVIRONMENT="$2"
+      shift 2
       ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
+    --after)
+      AFTER_DATE="$2"
+      shift 2
+      ;;
+    *)
+      echo "Invalid option: $1" >&2
       exit 1
       ;;
   esac
@@ -24,6 +31,12 @@ done
 if [[ "$ENVIRONMENT" != "prod" && "$ENVIRONMENT" != "dev" ]]; then
   echo "Invalid environment: $ENVIRONMENT. Must be 'prod' or 'dev'" >&2
   exit 1
+fi
+
+# Build WHERE clause if AFTER_DATE is set
+WHERE_CLAUSE=""
+if [[ -n "$AFTER_DATE" ]]; then
+  WHERE_CLAUSE="WHERE ir.created_at > '$AFTER_DATE'"
 fi
 
 docker compose exec -T -u root survey-flask-$ENVIRONMENT sqlite3 /tmp/dev.db <<EOF
@@ -53,6 +66,7 @@ LEFT JOIN inter_round_survey_responses ir
   ON u.id = ir.user_id
  AND utp.test_type       = ir.test_type
  AND utp.condition_number = ir.condition_number
+$WHERE_CLAUSE
 ;
 .quit
 EOF

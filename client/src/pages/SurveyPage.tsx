@@ -266,7 +266,7 @@ function SurveyPage() {
 					{/* Question Content */}
 					<div className="question-content">
 						<h2>Question {questionData.question_num + 1}</h2>
-						<h3>Click on an image to select your preferred trajectory. {questionData.test_type === "robot_nav" ? "Assume there could be vehicle traffic on all asphalt surfaces and the robot is able to traverse with some difficulty on grass." : "Avoid trajectories that could spill coffee over high value objects (like laptops, mice, cameras, headphones)."}</h3>
+						<h3>Click on the trajectory that satisfies the following: {questionData.test_type === "robot_nav" ? "Avoid asphalt and, when reasonable, grass; only choose these surfaces if avoiding them would cause a significant increase in travel time." : "Avoid hovering over high-value items (e.g., laptops, mice, cameras, headphones)."}</h3>
 						
 						{loadError ? (
 							<div>
