@@ -11,7 +11,7 @@ grass_street_nav_weights = np.array([-2.0, -0.1, -0.1, -5.0, -0.1])
 TABLETOP_FEATURE_BOUNDS = [(0, 4) for _ in range(4)]
 TABLETOP_TRUE_WEIGHTS = tabletop_weights / np.linalg.norm(tabletop_weights)
 
-GRASS_STREET_NAV_FEATURE_BOUNDS = [(-1, 1) for _ in range(5)]
+GRASS_STREET_NAV_FEATURE_BOUNDS = [(10, 50), (5, 75), (5, 75), (5, 75), (5, 75)]
 GRASS_STREET_NAV_TRUE_WEIGHTS = grass_street_nav_weights / np.linalg.norm(grass_street_nav_weights)
 
 def generate_feature_grid(feature_bounds, bins_per_dim=10):

@@ -271,11 +271,20 @@ if __name__ == '__main__':
         default=None,
         help='Optional subset of test_type values to include (e.g., robot_nav tabletop)'
     )
+    parser.add_argument(
+        '--no-attention-check',
+        dest='filter_attention_check',
+        action='store_false',
+        default=True,
+        help='Disable filtering rows failing attention check',
+    )
 
     args = parser.parse_args()
     labels = _parse_labels_arg(args.labels)
     
-    data = pd.read_csv(args.csv)
+    data = pd.read_csv(args.csv, dtype={'condition_number': 'Int64'})
+    data = data.dropna(subset=['condition_number'])
+    data['condition_number'] = data['condition_number'].astype(int)
     
     # Filter responses based on expected choice counts and non-empty survey metrics
     survey_metrics = ['mental_demand', 'success_level', 'frustration_level', 
@@ -293,6 +302,10 @@ if __name__ == '__main__':
             lambda x: x if isinstance(x, str) and len(eval(x)) == 6 else np.nan
         )
     data = data.dropna(subset=['choices'])
+    
+    # filter out rows with attention_check_pass == 0
+    if args.filter_attention_check:
+        data = data[data['attention_check_pass'] == 1]
     
     # Then filter for users who completed all conditions (0,1,2) for each test_type
     # and have all survey metrics filled

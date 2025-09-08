@@ -183,7 +183,7 @@ def get_inter_round_questions():
     ]
 
     # Decoy question (camouflaged sentence variant + ordinal wording)
-    decoy_expected = random.randint(1, 7)
+    decoy_expected = random.randint(3, 7)
     session['attention_check_expected'] = decoy_expected
     suffix = 'st' if decoy_expected == 1 else 'nd' if decoy_expected == 2 else 'rd' if decoy_expected == 3 else 'th'
     ordinal = f"{decoy_expected}{suffix}"
