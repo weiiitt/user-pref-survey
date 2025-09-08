@@ -77,7 +77,7 @@ function LandingPage({ onLoginSuccess }: { onLoginSuccess: (id: string) => void 
                         You are invited to take part in a research study about how people prefer robots to behave in common tasks such as navigation and object handling. The purpose of this study is to understand how humans make decisions when comparing robot actions, so we can improve robot learning algorithms.
                         </p>
                         <p>
-                        Your participation in this research is entirely voluntary. You may choose to stop participating at any time. The study will take approximately <b>25 to 35 minutes</b>, and up to <b>50 individuals</b> will participate.
+                        Your participation in this research is entirely voluntary. You may choose to stop participating at any time. The study will take approximately <b>10 to 15 minutes</b>, and up to <b>50 individuals</b> will participate.
                         </p>
                         <p>
                         This study will be conducted entirely online.
@@ -87,14 +87,11 @@ function LandingPage({ onLoginSuccess }: { onLoginSuccess: (id: string) => void 
                         </p>    
                         <ol>
                             <li>You will see a series of robot trajectories on your screen. In each image, the robot performs a task—either navigating through different terrains or carrying a cup of coffee over various objects. The robot's trajectory is indicated by the arrow on the image.</li>
-                            <li>You will be asked to <b>choose between two robot trajectories</b> in each round based on which behavior you prefer. There will be approximately <b>4 rounds of 10 comparisons</b> in each task.</li>
+                            <li>You will be asked to <b>choose between two robot trajectories</b> in each round based on which behavior you prefer. There will be approximately <b>3 rounds of 5-6 comparisons</b> in each task.</li>
                             <li>After each task, you will answer a short <b>questionnaire</b> about how you made your decisions and how well the robot learned your preferences.</li>
                         </ol>
                         <p>
-                        The total duration of the study is approximately <b>25-35 minutes</b>.
-                        </p>
-                        <p>
-                        You will be compensated $7.50 through <b>Prolific</b> once you complete the study and your responses are approved.
+                        You will be compensated $3.00 through <b>Prolific</b> once you complete the study and your responses are approved.
                         </p>
                         <p>
                         We will not collect any personal information about you during the study. Your responses will be associated only with your confidential <b>Prolific ID</b>, which is used solely for compensation purposes.
