@@ -29,7 +29,21 @@ def create_app(config_object="server.settings"):
     
         # Enable CORS for specific origins
     app.config.from_object(config_object)
-    CORS(app, origins=["http://localhost:5173", "http://localhost:5174", "https://weiiitt.github.io", "https://minnow-tolerant-usefully.ngrok-free.app"], supports_credentials=True)  # Allow frontend origins
+    CORS(
+        app, 
+        origins=
+        [
+            "http://localhost:5173", 
+            "http://localhost:5174", 
+            "https://weiiitt.github.io", 
+            "https://minnow-tolerant-usefully.ngrok-free.app", 
+            "https://uesrpref.loclx.io",
+        ], 
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization", "ngrok-skip-browser-warning"],  # add any custom headers used by the client
+        expose_headers=["Content-Type"],  
+    )  # Allow frontend origins
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)

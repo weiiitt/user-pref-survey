@@ -44,6 +44,7 @@ SELECT
   ir.difference_clarity,
   ir.preference_learning,
   ir.decision_factors,
+  ir.attention_check_pass,
   ir.created_at
 FROM users u
 LEFT JOIN user_test_progress utp
