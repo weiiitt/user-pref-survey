@@ -25,6 +25,13 @@ import argparse
 from typing import Optional, List
 import ast
 
+class RemapUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module.startswith("numpy._core"):
+            module = module.replace("numpy._core", "numpy.core", 1)
+        return super().find_class(module, name)
+
+
 def create_metric_boxplots_from_csv(
     data: pd.DataFrame,
     condition_labels: List[str],
@@ -185,7 +192,7 @@ def create_survey_plots(data: pd.DataFrame, condition_labels: List[str], outdir:
                 'server', 'assets', 'user_study', f'{test_name}-v{cond}', f'query_tree_{test_name}-v{cond}.pkl'
             )
             with open(pkl_path, 'rb') as f:
-                trees_by_condition[cond] = pickle.load(f)
+                trees_by_condition[cond] = RemapUnpickler(f).load()
 
         # Build per-user correlation rows for seaborn
         rows = []

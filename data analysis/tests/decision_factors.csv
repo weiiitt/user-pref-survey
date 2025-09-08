@@ -1,15 +1,9 @@
 test_type,decision_factors
-robot_nav,How fast the robot gets to the destination and whether asphalt is traversed.
-robot_nav,"Terrain was important, don't want the robot to get stuck. I also wanted speed, what if I am ordering food, dont want it to get too cold while it is moving."
-robot_nav,"okay to take the lowest time path as long as it was moving towards the goal
-if straightest path takes too long, then i'd obviously prefer the more convoluted-looking but lower time path"
-robot_nav,Considering the time was the essence
-robot_nav,The turns made by the robot
-robot_nav,Neither options had compelling trajectories
-tabletop,how efficient the trajectories are and whether the robot hovers over electronics
-tabletop,efficiency
-tabletop,"avoiding as many electronics as possible
-ranking which electronics to avoid - eg it's okay to move a cup over a mouse, but not headphones"
-tabletop,"The robot trajectories were jerky, or too much movement might cause issues while carrying something and might drop it things. With smooth, it looked more safe."
-tabletop,"The trajectory's color is little bit hard to distinguish form the background, maybe use green would be a better choice than blue since the background is blue."
-tabletop,Less jagged more direct
+robot_nav,I looked for terrain type for the most part.
+robot_nav,"I considered time to take, the quality of the terrain, and the efficiency/shape of the path"
+robot_nav,"Obstacles in path, what path they took"
+robot_nav,time mostly
+tabletop,"I mainly considered the objects the coffee would pass over, then I considered the smoothness of the path, then I considered the efficiency of the path"
+tabletop,I chose based on which objects the trajectory was going over.
+tabletop,"What percentage of the trajectory was on an electronic device if they both crossed electronic devices, did it hit non-electronic devices, did it hit electronic devices"
+tabletop,safety and smoothness
