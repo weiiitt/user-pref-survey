@@ -3,3 +3,6 @@ migrations/
 
 .env
 plots/
+*.pyc
+
+__pycache__/
